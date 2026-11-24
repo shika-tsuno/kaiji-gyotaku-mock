@@ -1151,9 +1151,9 @@ function openLinkedGoogleUrl(type) {
   const id = type === 'sheet' ? 'gs-sheet-url' : 'gs-drive-url';
   const raw = (document.getElementById(id)?.value || '').trim();
   if (!raw) {
-    const createUrl = type === 'sheet' ? 'https://sheets.new' : 'https://drive.google.com/drive/my-drive';
+    const createUrl = type === 'sheet' ? 'spreadsheet.html' : 'https://drive.google.com/drive/my-drive';
     window.open(createUrl, '_blank');
-    showToast(type === 'sheet' ? '📗 新規Googleスプレッドシートを開きます' : '📁 Googleドライブを開きます');
+    showToast(type === 'sheet' ? '📗 全5シートWebスプレッドシートを開きます' : '📁 Googleドライブを開きます');
     return;
   }
   const url = /^https?:\/\//i.test(raw)

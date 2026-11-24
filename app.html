@@ -1087,11 +1087,12 @@
           </div>
 
           <!-- スプレッドシート フォーマット＆実データ プレビュー（5シート切替） -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; flex-wrap:wrap; gap:6px;">
             <div style="font-size:12px; font-weight:800; color:#1E293B;">📋 スプレッドシート設計フォーマット（全5シート）</div>
-            <div style="display:flex; gap:4px;">
-              <button type="button" onclick="downloadCurrentSheetCsv()" style="border:1px solid #CBD5E1; background:#fff; color:#0F172A; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">📥 このシートCSV</button>
-              <button type="button" onclick="downloadAllSheetsCsv()" style="border:none; background:#065F46; color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">📦 全5シートCSV</button>
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <a href="spreadsheet.html" target="_blank" style="text-decoration:none; border:1px solid #059669; background:#ECFDF5; color:#065F46; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px;">📗 全画面スプシを開く ↗</a>
+              <a href="kaiji_master_template.xlsx" download="開示請求管理マスター_全5シート.xlsx" style="text-decoration:none; border:none; background:#065F46; color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px;">📥 .xlsx一括DL</a>
+              <button type="button" onclick="downloadCurrentSheetCsv()" style="border:1px solid #CBD5E1; background:#fff; color:#0F172A; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">CSV</button>
             </div>
           </div>
 

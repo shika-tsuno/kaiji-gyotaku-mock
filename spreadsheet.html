@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>開示請求管理マスター（掲示板・X・費用・アプリ連携） - Google スプレッドシート</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", Roboto, Arial, sans-serif;
+    background: #F9FBFD;
+    color: #1F1F1F;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* 上部Googleスプレッドシート風ヘッダー */
+  .gs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #F9FBFD;
+    border-bottom: 1px solid #E1E5EA;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .gs-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gs-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #0F9D58;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 18px;
+    box-shadow: 0 2px 6px rgba(15,157,88,0.25);
+  }
+  .gs-doc-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1F1F1F;
+  }
+  .gs-doc-sub {
+    font-size: 11px;
+    color: #5F6368;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .gs-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 17px;
+    border: 1px solid #DADCE0;
+    background: #FFFFFF;
+    color: #1F1F1F;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .btn:hover { background: #F1F3F4; }
+  .btn.green {
+    background: #0F9D58;
+    color: #FFFFFF;
+    border-color: #0F9D58;
+  }
+  .btn.green:hover { background: #0B8043; }
+  .btn.app-back {
+    background: #C2432A;
+    color: #FFFFFF;
+    border-color: #C2432A;
+  }
+
+  /* 数式バー (fx) */
+  .fx-bar {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E1E5EA;
+    padding: 0 12px;
+    font-size: 12.5px;
+    gap: 8px;
+  }
+  .cell-ref {
+    min-width: 56px;
+    font-weight: 700;
+    color: #1F1F1F;
+    border-right: 1px solid #E1E5EA;
+    padding-right: 8px;
+    text-align: center;
+    font-family: monospace;
+  }
+  .fx-label {
+    color: #5F6368;
+    font-style: italic;
+    font-weight: 700;
+    font-family: serif;
+    padding: 0 4px;
+  }
+  .fx-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 12.5px;
+    font-family: monospace;
+    color: #1F1F1F;
+    background: transparent;
+  }
+  .legend-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 5px 16px;
+    background: #F1F5F9;
+    border-bottom: 1px solid #CBD5E1;
+    font-size: 11.5px;
+    color: #334155;
+    flex-wrap: wrap;
+  }
+  .legend-bar span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+  }
+  .legend-bar i {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.2);
+  }
+
+  /* メイングリッド領域 */
+  .grid-container {
+    flex: 1;
+    overflow: auto;
+    background: #FFFFFF;
+    position: relative;
+  }
+  table.sheet-grid {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    font-size: 12px;
+  }
+  table.sheet-grid th, table.sheet-grid td {
+    border: 1px solid #E1E5EA;
+    padding: 6px 10px;
+    vertical-align: top;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 260px;
+  }
+  table.sheet-grid thead tr.col-letters th {
+    background: #F8F9FA;
+    color: #5F6368;
+    font-weight: 700;
+    font-size: 11px;
+    text-align: center;
+    padding: 4px 8px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    user-select: none;
+  }
+  table.sheet-grid td.row-num, table.sheet-grid th.row-num {
+    background: #F8F9FA;
+    color: #5F6368;
+    font-weight: 700;
+    font-size: 11px;
+    text-align: center;
+    width: 38px;
+    min-width: 38px;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    user-select: none;
+  }
+  table.sheet-grid tr.title-banner th.banner-cell {
+    background: #E8F5E9;
+    color: #1F1F1F;
+    text-align: center;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  table.sheet-grid tr.header-row th.col-head {
+    background: #E8F5E9;
+    color: #0F172A;
+    font-weight: 800;
+    text-align: center;
+    border-bottom: 2px solid #1E293B;
+    white-space: nowrap;
+  }
+  table.sheet-grid tr.header-row th.col-head.ext {
+    background: #FEF3C7;
+    color: #78350F;
+  }
+  table.sheet-grid td.selected {
+    outline: 2px solid #1A73E8;
+    outline-offset: -2px;
+    background: rgba(26, 115, 232, 0.04);
+  }
+  table.sheet-grid td.red-text { color: #D93025; }
+  table.sheet-grid td.num-cell { text-align: right; font-family: monospace; font-weight: 700; }
+  table.sheet-grid tr.sum-row td {
+    background: #F1F5F9;
+    font-weight: 800;
+    border-top: 2px solid #334155;
+  }
+
+  /* 下部シートタブバー（Googleスプレッドシート風） */
+  .bottom-tabs {
+    height: 40px;
+    background: #F1F3F4;
+    border-top: 1px solid #DADCE0;
+    display: flex;
+    align-items: stretch;
+    padding: 0 12px;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .b-tab {
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #5F6368;
+    cursor: pointer;
+    border-right: 1px solid #DADCE0;
+    white-space: nowrap;
+    background: transparent;
+    border-bottom: 3px solid transparent;
+  }
+  .b-tab:hover { background: #E8EAED; }
+  .b-tab.on {
+    background: #FFFFFF;
+    color: #0F9D58;
+    border-bottom-color: #0F9D58;
+  }
+  .toast {
+    position: fixed;
+    bottom: 56px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: #202124;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .2s;
+    z-index: 100;
+  }
+  .toast.on {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+  <header class="gs-header">
+    <div class="gs-brand">
+      <div class="gs-icon">田</div>
+      <div>
+        <div class="gs-doc-title">開示請求管理マスター（掲示板・X・費用・アプリ連携）</div>
+        <div class="gs-doc-sub">
+          <span>全5シート（弁護士管理フォーマット完全準拠 ＋ アプリ案件詳細逆算カラム）</span>
+        </div>
+      </div>
+    </div>
+    <div class="gs-actions">
+      <button class="btn" onclick="copyCurrentSheetTsv()">📋 このシートをコピー（スプシへ貼付可）</button>
+      <button class="btn" onclick="copyGasCode()">⚡ 自動構築GASをコピー</button>
+      <a class="btn green" href="kaiji_master_template.xlsx" download="開示請求管理マスター_全5シート.xlsx">📗 Excel/スプシ形式(.xlsx)をDL</a>
+      <button class="btn" onclick="downloadAllCsv()">📥 全5シートCSV</button>
+      <a class="btn app-back" href="app.html">‹ アプリ画面に戻る</a>
+    </div>
+  </header>
+
+  <div class="legend-bar">
+    <span><i style="background:#E8F5E9;"></i>緑ヘッダー：弁護士管理スプシ必須項目（①掲示板目録・②X目録・③費用管理 100%準拠）</span>
+    <span><i style="background:#FEF3C7;"></i>黄ヘッダー：アプリの案件詳細・魚拓・マイルストーン・ボール/タスク・分析から逆算した連携項目</span>
+    <span style="margin-left:auto;color:#0F9D58;">💡 セルをクリックすると下の fx バーに実際の数式・値が表示されます（直接編集も可能）</span>
+  </div>
+
+  <div class="fx-bar">
+    <div class="cell-ref" id="cell-ref">A1</div>
+    <div class="fx-label">fx</div>
+    <input type="text" class="fx-input" id="fx-input" readonly placeholder="セルを選択すると数式または値が表示されます">
+  </div>
+
+  <div class="grid-container" id="grid-container"></div>
+
+  <div class="bottom-tabs" id="bottom-tabs">
+    <div class="b-tab on" data-sheet="bbs" onclick="selectSheet('bbs')">▾ 投稿記事目録_掲示板</div>
+    <div class="b-tab" data-sheet="x" onclick="selectSheet('x')">▾ 投稿記事目録_X</div>
+    <div class="b-tab" data-sheet="cost" onclick="selectSheet('cost')">▾ 費用・入金管理</div>
+    <div class="b-tab" data-sheet="tasks" onclick="selectSheet('tasks')">▾ タスク・ボール管理</div>
+    <div class="b-tab" data-sheet="docs" onclick="selectSheet('docs')">▾ 書類・証拠Drive・チャット管理</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+<script>
+let activeSheet = 'bbs';
+
+function showSheetToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('on'), 2400);
+}
+
+function selectSheet(key) {
+  activeSheet = key;
+  document.querySelectorAll('.b-tab').forEach(t => t.classList.toggle('on', t.dataset.sheet === key));
+  const s = GS_SHEETS_SCHEMA[key];
+  if (!s) return;
+
+  const colCount = s.headers.length;
+  let html = '<table class="sheet-grid"><thead>';
+  html += '<tr class="col-letters"><th class="row-num"></th>' +
+    s.headers.map((_, i) => `<th>${colLetter(i)}</th>`).join('') + '</tr></thead><tbody>';
+
+  let currentRowNum = 1;
+  if (s.titleBanner) {
+    html += `<tr class="title-banner"><td class="row-num">1</td><th class="banner-cell" colspan="${s.lawyerColCount}">${s.titleBanner}</th>` +
+      s.headers.slice(s.lawyerColCount).map(() => '<td></td>').join('') + '</tr>';
+    html += `<tr><td class="row-num">2</td>` + s.headers.map(() => '<td></td>').join('') + '</tr>';
+    currentRowNum = 3;
+  }
+
+  // ヘッダー行
+  html += `<tr class="header-row"><td class="row-num">${currentRowNum}</td>` +
+    s.headers.map((h, i) => `<th class="col-head ${i >= s.lawyerColCount ? 'ext' : ''}" data-addr="${colLetter(i)}${currentRowNum}" data-fx="${h}">${h}</th>`).join('') + '</tr>';
+  currentRowNum++;
+
+  // データ行
+  s.rows.forEach((row, rIdx) => {
+    const isCostSum = key === 'cost' && rIdx === s.rows.length - 1;
+    const dispRowNum = isCostSum ? 31 : currentRowNum;
+    html += `<tr class="${isCostSum ? 'sum-row' : ''}"><td class="row-num">${dispRowNum}</td>` +
+      row.map((val, cIdx) => {
+        const addr = `${colLetter(cIdx)}${dispRowNum}`;
+        let fx = val;
+        // 費用管理シートは実物のExcel/Googleスプレッドシート数式を保持
+        if (key === 'cost') {
+          if (rIdx === 0 && cIdx === 5) fx = '1980000';
+          else if (!isCostSum && rIdx >= 1) {
+            if (cIdx === 3) fx = `=IF(C${dispRowNum}="",0,ROUND(C${dispRowNum}*0.55,0))`;
+            else if (cIdx === 4) fx = `=IF(C${dispRowNum}="",0,C${dispRowNum}-D${dispRowNum})`;
+            else if (cIdx === 5) fx = `=F${dispRowNum - 1}-E${dispRowNum}`;
+          } else if (isCostSum) {
+            if (cIdx === 2) fx = '=SUM(C3:C30)';
+            else if (cIdx === 3) fx = '=SUM(D3:D30)';
+            else if (cIdx === 4) fx = '=SUM(E3:E30)';
+            else if (cIdx === 8) fx = '=SUM(I3:I30)';
+          }
+        }
+        const isRed = s.redTextStyle && cIdx < s.lawyerColCount;
+        const isNum = key === 'cost' && ((cIdx >= 2 && cIdx <= 5) || cIdx === 8);
+        const cls = [isRed ? 'red-text' : '', isNum ? 'num-cell' : ''].filter(Boolean).join(' ');
+        return `<td class="${cls}" contenteditable="true" data-addr="${addr}" data-fx="${String(fx).replace(/"/g, '&quot;')}">${val}</td>`;
+      }).join('') + '</tr>';
+    currentRowNum++;
+  });
+
+  // 空行も追加して本物のスプレッドシート感を出す
+  for (let extra = 0; extra < 8; extra++) {
+    const rNum = (key === 'cost' ? 32 : currentRowNum) + extra;
+    html += `<tr><td class="row-num">${rNum}</td>` +
+      s.headers.map((_, cIdx) => `<td contenteditable="true" data-addr="${colLetter(cIdx)}${rNum}" data-fx=""></td>`).join('') + '</tr>';
+  }
+
+  html += '</tbody></table>';
+  const container = document.getElementById('grid-container');
+  container.innerHTML = html;
+
+  container.querySelectorAll('td[data-addr], th[data-addr]').forEach(cell => {
+    cell.addEventListener('click', () => {
+      container.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+      cell.classList.add('selected');
+      document.getElementById('cell-ref').textContent = cell.dataset.addr;
+      document.getElementById('fx-input').value = cell.dataset.fx || cell.textContent;
+    });
+  });
+}
+
+function copyCurrentSheetTsv() {
+  const s = GS_SHEETS_SCHEMA[activeSheet];
+  const lines = [];
+  if (s.titleBanner) {
+    const t = new Array(s.headers.length).fill('');
+    t[0] = s.titleBanner;
+    lines.push(t.join('\t'));
+    lines.push(new Array(s.headers.length).fill('').join('\t'));
+  }
+  lines.push(s.headers.join('\t'));
+  s.rows.forEach(r => lines.push(r.map(v => String(v ?? '').replace(/\r?\n/g, ' ')).join('\t')));
+  navigator.clipboard.writeText(lines.join('\n'));
+  showSheetToast(`📋「${s.name}」をコピーしました！GoogleスプレッドシートのA1セルにそのままCtrl+V（⌘+V）で貼り付けられます`);
+}
+
+function copyGasCode() {
+  copyGasSetupScript();
+  showSheetToast('⚡ 全5シート＋数式＋Driveフォルダ自動構築GASをコピーしました！');
+}
+
+function downloadAllCsv() {
+  downloadAllSheetsCsv();
+  showSheetToast('📥 全5シートのCSVファイルをダウンロードしました！');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  selectSheet('bbs');
+});
+</script>
+</body>
+</html>
