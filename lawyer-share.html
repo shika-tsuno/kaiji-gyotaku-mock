@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【弁護士共有資料】誹謗中傷 開示請求 管理アプリ 画面設計・運用ガイド（第30版）</title>
+<link rel="stylesheet" href="css/lawyer-share.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- トップヘッダー -->
+  <div class="hero">
+    <div>
+      <span class="hero-badge">第30版・弁護士共有用ドキュメント</span>
+      <h1>誹謗中傷 開示請求 管理アプリ（画面設計・運用ガイド）</h1>
+      <p>依頼者と担当弁護士の2名間で、対象投稿の証拠保全・12段階の進捗・書類フォーマット指示・示談金管理を一元化する専用システム</p>
+    </div>
+    <div class="hero-actions no-print">
+      <a class="btn btn-gold" href="./app.html">📱 実動デモページ（app.html）を触ってみる ›</a>
+      <a class="btn btn-light" href="./images/画面イメージ_第30版.png" target="_blank">🖼 15画面の高解像度PNGを開く</a>
+      <button class="btn btn-light" onclick="window.print()">🖨 この資料をPDF保存・印刷</button>
+    </div>
+  </div>
+
+  <!-- 1. システムの4大特徴 -->
+  <div class="card">
+    <div class="sec-title">
+      <span class="tag">POINT 1</span>
+      <span>先生とのやり取りをスムーズにする4つの設計ポイント</span>
+    </div>
+    <div class="grid-4">
+      <div class="feat-box">
+        <h3>① 3つの軸でいつでも状況整理</h3>
+        <p>
+          <b>「①投稿ごと」「②ユーザーごと（同一アカウント名寄せ）」「④本名ごと（開示後の同一人物・合算示談管理）」</b>をワンタップで切り替え可能。LINEトーク一覧のように画面幅いっぱいで見やすく一覧できます。
+        </p>
+      </div>
+      <div class="feat-box">
+        <h3>② 12段階の進捗＋5つの分岐マップ</h3>
+        <p>
+          申立て〜開示命令〜Web期日〜プロバイダ〜示談〜振込完了までの<b>本線12ステップ</b>に加え、不開示や示談破棄などの<b>5つの分岐ルート</b>を「⑦進捗」「⑮フローチャート全体図」で視覚的に共有できます。
+        </p>
+      </div>
+      <div class="feat-box">
+        <h3>③ 書類ひな形（丸囲みA〜F）と簡単依頼</h3>
+        <p>
+          委任状や秘匿事項届出書面などを<b>丸囲み記号 A〜F</b> とパッケージで管理。「⑬書類の記入依頼」から<b>「日付だけ」「署名＋押印まで」</b>をタップするだけで、対象案件のチャットに記入依頼を自動送信できます。
+        </p>
+      </div>
+      <div class="feat-box">
+        <h3>④ Google認証（2名限定）＆ドライブ直結</h3>
+        <p>
+          依頼者と先生の<b>Googleアカウント2名のみ</b>ログイン可能。証拠スクショ（自動帯付き）やPDFは案件ごとのGoogleドライブフォルダへ自動格納され、LINEには更新通知のみが届きます。
+        </p>
+      </div>
+    </div>
+
+    <div class="rule-bar">
+      <strong>【画面内の番号・記号ルール】</strong>
+      <div class="rule-item">
+        <span class="badge-sample-id">#01</span>
+        <span><b>投稿（案件）番号</b>：頭に <code>#</code> を付けて表示</span>
+      </div>
+      <div class="rule-item">
+        <span class="badge-sample-step">01 〜 12</span>
+        <span><b>進捗ステップ番号</b>：<code>#</code> 無しの2桁数字で表示</span>
+      </div>
+      <div class="rule-item">
+        <span class="badge-sample-alpha">A</span>
+        <span><b>書類フォーマット記号</b>：丸囲みのアルファベット（A〜F）で表示</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 全15画面 全体プレビュー -->
+  <div class="card">
+    <div class="sec-title">
+      <span class="tag">POINT 2</span>
+      <span>全15画面のデザイン一覧（第30版）</span>
+    </div>
+    <div class="panorama-hint no-print">
+      <span>← 横にスクロールして全15画面を拡大確認できます（画像クリックで原寸表示） →</span>
+      <a href="./images/画面イメージ_第30版.png" target="_blank" style="color:var(--gold);font-weight:700;text-decoration:none">別タブで原寸画像を開く ↗</a>
+    </div>
+    <div class="panorama-wrap">
+      <a href="./images/画面イメージ_第30版.png" target="_blank">
+        <img src="./images/画面イメージ_第30版.png" alt="管理アプリ 画面イメージ 第30版（全15画面）">
+      </a>
+    </div>
+  </div>
+
+  <!-- 3. 各画面（①〜⑮）の役割と操作ガイド -->
+  <div class="card">
+    <div class="sec-title">
+      <span class="tag">POINT 3</span>
+      <span>各画面（①〜⑮）の役割と主な機能</span>
+    </div>
+    <div class="screens-grid">
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">① 投稿ごと（トップ一覧）</span>
+          <a class="scr-jump no-print" href="./app.html" onclick="localStorage.setItem('kaiji_jump','posts')">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">すべての投稿案件（#01〜）をLINEトーク一覧風に表示。「私の番」「未読」「終了」で絞り込みでき、最新発言が依頼者（K）か先生（弁）かも一目で分かります。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">② ユーザーごと</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">同一アカウント（@sample_user01 等）の複数投稿を名寄せ表示。「[2件 ▾]（その場でツリー展開）」と「[詳細 ›]（③ユーザー詳細ページへ）」のボタンを分けています。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">③ ユーザー詳細ページ</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">アカウントの呼び名変更、対象URL、このユーザーの全投稿一覧、ユーザー共通メモ（プロフィール魚拓など）を管理。本名欄からは⑤本名詳細ページへ飛べます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">④ 本名ごと</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">開示された発信者の本名ごとに一覧化。別アカウント（Xと5chなど）でも同一人物と判明した案件を名寄せし、「[2件 ▾]」と「[詳細 ›]」で素早く確認できます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑤ 本名詳細・データ編集ページ</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">開示された氏名（例：山田 太郎）・住所・連絡先備考の登録・編集と、複数案件を合算した示談金額・振込期日・振込完了日、紐づく投稿一覧を一元管理します。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑥ 投稿詳細</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">対象投稿の帯付き証拠画像、同一ユーザー詳細（③）へのリンク、開示した本名ページ（⑤または新規本名登録）への遷移ボタン、示談・振込状況をまとめて確認できます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑦ 進捗（12段階タイムライン）</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">01〜12の現在地、Web期日やX回答期限などの「期日・期限バッジ」を表示・登録可能。上部ボタンから「⑮フローチャート全体図」へいつでも飛べます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑧ チャット</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">案件ごとの専用チャット。先生からの【書類のご依頼】（丸囲みA・B・C）や、依頼者が記入・撮影した書類写真のやり取りが案件単位で整理されます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑨ 書類（ファイル一覧＆証拠保全連携）</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">別システムの「証拠保全ツール（自動スクショ・帯付）」へ飛ぶボタンと、カメラ撮影・ファイル格納、保存済みファイルの1行リスト（名前＋日時）を表示します。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑩ URL登録（新規投稿追加）</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">投稿URLを貼ると証拠スクショを自動取得し、既存案件（#01等）に同じIDがあれば自動検知して「一緒（紐付ける）／別人」を選択して登録できます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑪ フォーマット一覧</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">上部に「＋新規パッケージ」「＋新規フォルダ」「＋新規依頼」の3ボタンとパッケージアイコンを配置。下に丸囲み記号（A〜F）の書類一覧が並びます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑫ 書類フォーマット詳細</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">⑪の各書類をタップすると開く詳細画面。書類プレビューと記入箇所ガイド、PDFダウンロード、文面ファイルの差替（版数更新）、履歴確認が行えます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑬ 書類の記入依頼（先生→依頼者）</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">対象案件とパッケージを選び、丸囲みA〜Dごとに「日付だけ」「名前だけ」「日付＋署名＋押印まで」をタップするだけで、チャットへ依頼文を送信できます。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑭ アカウント確認</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">ログイン中のGoogleアカウント確認、保存先Googleドライブ／スプレッドシート連携状態、LINE通知連携、許可メンバー2名の確認画面です。</div>
+      </div>
+
+      <div class="scr-card">
+        <div class="scr-head">
+          <span class="scr-name">⑮ フローチャート全体図</span>
+          <a class="scr-jump no-print" href="./app.html">デモで見る ›</a>
+        </div>
+        <div class="scr-desc">左側に本線（01〜12）、右側に5つの分岐（不開示・X拒否・プロバイダ特定不可・示談破棄→裁判準備中）を並べ、案件が今どこにあるか一目で把握できます。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

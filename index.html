@@ -1,0 +1,1729 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="開示請求管理">
+<meta name="theme-color" content="#FAF9F7">
+<title>開示請求 進捗管理アプリ（iPhone版 第47版）</title>
+<link rel="stylesheet" href="css/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- 右上に常時表示される吹き出し（連絡 ＆ ＋追加） -->
+  <div id="top-bubbles" class="sr-top-bubbles">
+    <button type="button" class="sr-bubble-pill" onclick="openChatFromBubble()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>連絡</span>
+      <span class="sr-cnt-dot">3</span>
+    </button>
+    <button type="button" class="sr-bubble-pill primary" onclick="openQuickModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>追加</span>
+    </button>
+  </div>
+
+  <!-- メイン画面スタック -->
+  <div class="main-view-stack">
+
+    <!-- 1. 案件一覧ビュー（第33版 完全移植） -->
+    <div id="view-cases" class="view-page sr-view">
+      <div class="sr-body">
+        <div class="c33-top">
+          <h1>案件一覧</h1>
+          <div class="c33-pills">
+            <button type="button" class="c33-pill" id="c33-vb">表示情報<small>▼</small></button>
+            <button type="button" class="c33-pill" id="c33-sb">並替: <span id="c33-sl">No.</span> <span id="c33-sd">↑</span></button>
+            <div class="c33-menu" id="c33-vm"></div>
+            <div class="c33-menu" id="c33-sm"></div>
+          </div>
+        </div>
+        <div class="c33-search">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#6F879A" stroke-width="1.7"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
+          <input id="c33-q" placeholder="名前・ID・No.で検索">
+        </div>
+        <div class="c33-chips" id="c33-chips"></div>
+        <div class="c33-prow" id="c33-prow">期間<input type="date" id="c33-from"><span>〜</span><input type="date" id="c33-to"></div>
+        <div id="c33-list"></div>
+      </div>
+    </div>
+
+    <!-- 2. 分析・効果測定ビュー（添付2枚目） -->
+    <div id="view-analytics" class="view-page sr-view">
+      <div class="sr-body">
+        <div class="sr-top has-bubbles">
+          <div>
+            <h1>分析・効果測定</h1>
+            <small>手続きの成果と次の一手のふりかえり</small>
+          </div>
+        </div>
+
+        <!-- 手続きの成果カード -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>手続きの成果</b>
+            <div class="sr-seg" data-analytics-seg="analytics">
+              <span data-d="7">7日</span>
+              <span data-d="30" class="on">30日</span>
+              <span data-d="90">90日</span>
+            </div>
+          </div>
+          <div class="sr-kpis" id="an-kpis"></div>
+          <div class="sr-chart" id="an-chart">
+            <svg id="an-svg"></svg>
+            <div class="sr-tip" id="an-tip"></div>
+          </div>
+          <div class="sr-legend" id="an-legend"></div>
+          <div class="sr-rev" id="an-rev"></div>
+          <div class="sr-note">
+            着手率＝スクショを出した投稿のうち、弁護士が開示の準備に入った割合<br>
+            開示成功率＝開示請求の結果が出たうち、相手の情報が開示された割合<br>
+            回収率＝相手が判明したうち、示談金・賠償金を受け取れた割合<br>
+            （いずれも その日までの累計）
+          </div>
+        </div>
+
+        <!-- 別の投稿で再挑戦できるかもカード -->
+        <div class="sr-card retry">
+          <div class="sr-hd">
+            <b>別の投稿で再挑戦できるかも</b>
+            <span class="sr-badge" style="background:#AF52DE">2</span>
+          </div>
+          <div class="sr-rl">開示が却下された案件でも、同じ相手の<b>別の投稿</b>なら開示が通ることがあります。</div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-why court">裁判所</span>
+            <div class="sr-tx">
+              <b>#12 とおりすがりC</b>
+              <small>却下理由：権利侵害が明らかとはいえない</small>
+              <small class="sr-alt">同じアカウントの別の投稿 <em>3件</em> を保存済み</small>
+            </div>
+            <span class="sr-chev">›</span>
+          </div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-why pv">プロバイダ</span>
+            <div class="sr-tx">
+              <b>#08 匿名レス512</b>
+              <small>却下理由：通信記録の保存期間切れ</small>
+              <small class="sr-alt">同じ人の新しい投稿 <em>2件</em>（記録が残っている期間内）</small>
+            </div>
+            <span class="sr-chev">›</span>
+          </div>
+          <div class="sr-rbtn soft" onclick="handleTabClick('cases')">別の投稿を選んで再挑戦する ›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ホームビュー（添付1枚目・初期表示） -->
+    <div id="view-home" class="view-page sr-view active">
+      <div class="sr-body">
+        <div class="sr-top has-bubbles">
+          <div>
+            <small>11月19日（木）</small>
+            <h1>ひよこが2羽、<br>もうすぐ にわとり！</h1>
+          </div>
+        </div>
+
+        <!-- いま ボールを持っているのは？ -->
+        <div class="sr-card" id="home-ballcard">
+          <div class="sr-hd"><b>いま ボールを持っているのは？</b></div>
+          <div class="sr-court" id="home-court">
+            <div class="sr-side me" data-s="me">
+              <svg class="sr-fig" viewBox="0 0 100 134"></svg>
+              <div class="sr-pile"></div>
+              <div class="sr-who">あなた</div>
+              <div class="sr-cnt"><span>0</span><small>個</small></div>
+            </div>
+            <div class="sr-arc">
+              <svg viewBox="0 0 120 44"><path d="M8 40 Q60 -6 112 40" fill="none" stroke="#C9BCC4" stroke-width="1.5" stroke-dasharray="3 4"/><path d="M104 34 L112 40 L102 42" fill="none" stroke="#C9BCC4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ボール＝次に動く人
+            </div>
+            <div class="sr-side law" data-s="law">
+              <svg class="sr-fig" viewBox="0 0 100 134"></svg>
+              <div class="sr-pile"></div>
+              <div class="sr-who">神田弁護士</div>
+              <div class="sr-cnt"><span>0</span><small>個</small></div>
+            </div>
+          </div>
+          <div class="sr-bl" id="home-blist"></div>
+        </div>
+
+        <!-- ひよこ階段 ＆ 収支 -->
+        <div class="sr-card">
+          <div class="sr-bars" id="home-bars"></div>
+          <div class="sr-labels">
+            <span>準備中</span><span>開示中</span><span>相手判明</span><span style="color:var(--sr-tint)">解決</span>
+          </div>
+          <div class="sr-money">
+            <div>
+              <div class="l">いまの収支</div>
+              <div class="v">+10.4<small>万円</small></div>
+              <div class="s">入金40万 − 支払29.6万</div>
+            </div>
+            <div>
+              <div class="l">終わったときの見込み</div>
+              <div class="v">+33.7<small>万円</small></div>
+              <div class="s">これから入金30万 − 支払6.3万</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 開示の進みぐあい（マイルストーン） -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>開示の進みぐあい</b>
+            <span class="sr-hd-sub">コマ1つ＝案件1件</span>
+          </div>
+          <div class="sr-ms" id="home-ms"></div>
+        </div>
+
+        <!-- 手続きの成果 ＆ ふりかえり（ホーム内） -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>手続きの成果</b>
+            <div class="sr-seg" data-analytics-seg="home">
+              <span data-d="7">7日</span>
+              <span data-d="30" class="on">30日</span>
+              <span data-d="90">90日</span>
+            </div>
+          </div>
+          <div class="sr-kpis" id="hm-kpis"></div>
+          <div class="sr-chart" id="hm-chart">
+            <svg id="hm-svg"></svg>
+            <div class="sr-tip" id="hm-tip"></div>
+          </div>
+          <div class="sr-legend" id="hm-legend"></div>
+          <div class="sr-rev" id="hm-rev"></div>
+          <div class="sr-note">
+            着手率＝スクショを出した投稿のうち、弁護士が開示の準備に入った割合<br>
+            開示成功率＝開示請求の結果が出たうち、相手の情報が開示された割合<br>
+            回収率＝相手が判明したうち、示談金・賠償金を受け取れた割合<br>
+            （いずれも その日までの累計）
+          </div>
+        </div>
+
+        <!-- あなたのタスク（ホーム内） -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>あなたのタスク</b>
+            <span class="sr-badge" id="home-tbadge">0</span>
+          </div>
+          <div id="home-tasks"></div>
+        </div>
+
+        <!-- 別の投稿で再挑戦できるかも（ホーム内） -->
+        <div class="sr-card retry">
+          <div class="sr-hd">
+            <b>別の投稿で再挑戦できるかも</b>
+            <span class="sr-badge" style="background:#AF52DE">2</span>
+          </div>
+          <div class="sr-rl">開示が却下された案件でも、同じ相手の<b>別の投稿</b>なら開示が通ることがあります。</div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-why court">裁判所</span>
+            <div class="sr-tx">
+              <b>#12 とおりすがりC</b>
+              <small>却下理由：権利侵害が明らかとはいえない</small>
+              <small class="sr-alt">同じアカウントの別の投稿 <em>3件</em> を保存済み</small>
+            </div>
+            <span class="sr-chev">›</span>
+          </div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-why pv">プロバイダ</span>
+            <div class="sr-tx">
+              <b>#08 匿名レス512</b>
+              <small>却下理由：通信記録の保存期間切れ</small>
+              <small class="sr-alt">同じ人の新しい投稿 <em>2件</em>（記録が残っている期間内）</small>
+            </div>
+            <span class="sr-chev">›</span>
+          </div>
+          <div class="sr-rbtn" onclick="handleTabClick('cases')">別の投稿を選んで再挑戦する ›</div>
+        </div>
+
+        <!-- 今後の予定 -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>今後の予定</b>
+            <a onclick="handleTabClick('cases')">すべて見る ›</a>
+          </div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-d">11/26</span>
+            <div class="sr-tx">
+              <b>X側のIP開示 期日</b>
+              <small>#02 例のアカウント</small>
+            </div>
+          </div>
+          <div class="sr-row-item" onclick="handleTabClick('cases')">
+            <span class="sr-d">11/30</span>
+            <div class="sr-tx">
+              <b>振込予定（30万円）</b>
+              <small>#05 山田 太郎</small>
+            </div>
+            <span class="sr-pill-tag">要確認</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. タスクビュー（添付3枚目） -->
+    <div id="view-tasks" class="view-page sr-view sr-task-mode">
+      <div class="sr-body">
+        <div class="sr-top has-bubbles">
+          <div>
+            <h1>タスク</h1>
+            <small>いまやるべきこととボールの状況</small>
+          </div>
+        </div>
+
+        <!-- いま ボールを持っているのは？ -->
+        <div class="sr-card" id="task-ballcard">
+          <div class="sr-hd">
+            <b>いま ボールを持っているのは？</b>
+            <span class="sr-hd-sub">タップで切替</span>
+          </div>
+          <div class="sr-court" id="task-court">
+            <div class="sr-side me" data-s="me">
+              <svg class="sr-fig" viewBox="0 0 100 134"></svg>
+              <div class="sr-who">あなた</div>
+              <div class="sr-cnt"><span>0</span><small>個</small></div>
+              <div class="sr-pile"></div>
+            </div>
+            <div class="sr-arc">
+              <svg viewBox="0 0 120 44"><path d="M8 40 Q60 -6 112 40" fill="none" stroke="#C9BCC4" stroke-width="1.5" stroke-dasharray="3 4"/><path d="M104 34 L112 40 L102 42" fill="none" stroke="#C9BCC4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ボール＝<br>次に動く人
+            </div>
+            <div class="sr-side law" data-s="law">
+              <svg class="sr-fig" viewBox="0 0 100 134"></svg>
+              <div class="sr-who">神田弁護士</div>
+              <div class="sr-cnt"><span>0</span><small>個</small></div>
+              <div class="sr-pile"></div>
+            </div>
+          </div>
+          <div class="sr-bl" id="task-blist"></div>
+        </div>
+
+        <!-- あなたのタスク（ひよこ応援バー＆作業の種類ごと） -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b style="flex:none;">あなたのタスク</b>
+            <span class="sr-badge" id="task-tbadge">0</span>
+            <span class="sr-hd-sub" style="margin-left:auto;">作業の種類ごと</span>
+          </div>
+          <div class="sr-cheer">
+            <div class="sr-cheer-chick">🐥</div>
+            <div class="sr-cheer-bubble" id="task-cheer-msg">のこり9つ。1つずつ進めよう</div>
+          </div>
+          <div class="sr-cheer-prog"><i id="task-cheer-bar" style="width:0%"></i></div>
+          <div id="task-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1-B. 投稿詳細ビュー（新枠組み ＆ 進捗追加ボタン新設版） -->
+    <div id="view-post-detail" class="view-page">
+      <div class="subpage-nav-bar">
+        <button class="back-btn" onclick="goBackView()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          案件一覧
+        </button>
+        <span class="subpage-title">投稿詳細</span>
+        <div style="width:60px; text-align:right;">
+          <button style="background:none; border:none; font-size:13px; font-weight:600; color:#FF5A5F; cursor:pointer;" onclick="showToast('共有リンクを生成しました')">共有</button>
+        </div>
+      </div>
+      <div class="screen">
+      <!-- 1. ステータスバー -->
+      
+
+      <!-- 2. ナビゲーションバー (‹ 投稿一覧 | 投稿詳細 | 共有) -->
+      <div class="nav-header" style="justify-content:space-between; padding: 10px 16px 8px; border-bottom: 1px solid var(--sys-separator);">
+        <div class="nav-back-link" style="color:var(--accent-peach-text); font-size:13.5px; font-weight:700; display:inline-flex; align-items:center; gap:2px; cursor:pointer;">
+          <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2.5; fill:none;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          投稿一覧
+        </div>
+        <div class="nav-title" style="font-size:15px; font-weight:800; color:var(--sys-label-primary);">投稿詳細</div>
+        <div style="font-size:13px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">共有</div>
+      </div>
+
+      <!-- スクロール本文エリア -->
+      <div class="scroll-content" style="padding: 14px 14px 80px; display:flex; flex-direction:column; gap:18px;">
+
+        <!-- 3. 発信者・投稿ヘッダーカード -->
+        <div class="card" style="padding: 12px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04); display:flex; align-items:center; gap:12px;">
+          <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
+            ダ
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:16px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:6px;">
+              ダミー次郎
+            </div>
+            <div style="font-size:12px; color:var(--sys-label-secondary); margin-top:2px;">
+              X: @dummy_jiro
+            </div>
+            <div style="font-size:11px; color:var(--sys-label-tertiary); margin-top:2px;">
+              発信者No. 2008001 ・ 投稿No. 20081001
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 角丸ピル形状の水平タブ ([投稿] [アカウント] [発信者] [書類] [チャット 2]) -->
+        <div style="display:flex; gap:6px; background:rgba(155,143,178,0.12); padding:4px; border-radius:14px;">
+          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:800; background:#FFFFFF; color:var(--sys-label-primary); border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); cursor:pointer;">
+            投稿
+          </div>
+          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
+            アカウント
+          </div>
+          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
+            発信者
+          </div>
+          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
+            書類
+          </div>
+          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); display:flex; align-items:center; justify-content:center; gap:3px; cursor:pointer;">
+            チャット
+            <span style="background:var(--accent-peach); color:#fff; font-size:9px; font-weight:800; padding:1px 5px; border-radius:8px;">2</span>
+          </div>
+        </div>
+
+        <!-- 5. 取得魚拓プレビュー（証拠原本・C案仕様） -->
+        <div class="shot" style="border-radius:14px; overflow:hidden; border:1px solid rgba(155,143,178,0.22); background:#FFFFFF; box-shadow:0 4px 16px rgba(59,48,84,0.06);">
+          <!-- ブラウザヘッダーバー -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:#F1EFF5; border-bottom:1px solid rgba(155,143,178,0.14);">
+            <div style="display:flex; align-items:center; gap:6px; min-width:0; flex:1;">
+              <span style="font-size:9.5px; font-weight:800; background:rgba(16,185,129,0.14); color:#047857; padding:1px 6px; border-radius:4px; flex:none;">保全済</span>
+              <span style="font-size:10px; color:var(--sys-label-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace;">https://x.com/dummy_jiro/status/1846...</span>
+            </div>
+            <div style="display:flex; gap:6px; flex:none; margin-left:6px;">
+              <svg viewBox="0 0 24 24" style="width:13px; height:13px; stroke:var(--sys-label-secondary); stroke-width:2; fill:none;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </div>
+          </div>
+
+          <!-- X投稿原本カード -->
+          <div style="padding: 12px 12px 10px; background:#FFFFFF;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <div style="width:32px; height:32px; border-radius:50%; background:#E2E8F0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#475569;">
+                  ダ
+                </div>
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:4px;">
+                    ダミー次郎
+                    <span style="font-size:10px; font-weight:600; color:#64748B;">@dummy_jiro</span>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:10.5px; font-weight:700; color:#0F172A; border:1px solid #CBD5E1; padding:2px 8px; border-radius:12px;">
+                フォローする
+              </div>
+            </div>
+
+            <!-- 本文 -->
+            <p style="font-size:12px; line-height:1.55; color:#0F172A; margin:0 0 8px; font-weight:500;">
+              〇〇の経歴は全部嘘で犯罪歴もある。こいつのファンも詐欺グループと変わらんわ。店行くだけでもリスク。拡散希望。
+            </p>
+
+            <div style="font-size:10px; color:#64748B; margin-bottom:8px;">
+              午後8:10 · 2026年8月10日 · <strong style="color:#0F172A;">1.8万</strong> 件の表示
+            </div>
+
+            <!-- アクションバー -->
+            <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#64748B; border-top:1px solid #F1F5F9; padding-top:6px;">
+              <span>💬 14</span>
+              <span>🔁 42</span>
+              <span>❤️ 128</span>
+              <span>🔖 19</span>
+            </div>
+          </div>
+
+          <!-- ダークハッシュバー（タイムスタンプ ＆ SHA-256） -->
+          <div style="background:#1E182A; color:#E2E8F0; padding:6px 10px; font-size:9.5px; font-family:monospace; display:flex; flex-direction:column; gap:2px; border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:#94A3B8;">保全日時: 2026-08-10 21:18:24 JST</span>
+              <span style="color:#34D399; font-weight:700;">● 原本保全済</span>
+            </div>
+            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#CBD5E1;">
+              SHA-256: 8f4a3c10b7e289...d9a04ef12
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. 手続の進み具合（縦線マイルストーンタイムライン） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">手続の進み具合</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">フロー全体 ›</div>
+          </div>
+
+          <!-- ご指示反映：⑥のボタンと同じボタンで「進捗追加」ボタンを新設 -->
+          <div style="background:var(--sunrise-grad); color:#FFF; border-radius:12px; padding:9px 14px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:800; box-shadow:0 3px 10px rgba(255, 110, 110, 0.28); cursor:pointer; margin-bottom:10px;">
+            <svg viewBox="0 0 24 24" style="width:15px; height:15px; stroke:#FFF; stroke-width:2.5; fill:none;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>進捗を追加</span>
+          </div>
+
+          <div class="card" style="padding:14px 12px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
+            <div class="tl" style="position:relative; padding-left:22px;">
+              <!-- 縦線 -->
+              <div style="position:absolute; left:6px; top:8px; bottom:12px; width:2px; background:linear-gradient(180deg, #10B981 0%, #FF8A65 60%, #CBD5E1 100%);"></div>
+
+              <!-- ステップ 1: 投稿 -->
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#10B981; border:2.5px solid #FFFFFF; box-shadow:0 0 0 1px #10B981;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12.5px; font-weight:700; color:var(--sys-label-primary);">投稿</span>
+                  <span style="font-size:11px; color:var(--sys-label-secondary); font-family:monospace;">8/10</span>
+                </div>
+              </div>
+
+              <!-- ステップ 2: 弁護士に依頼 -->
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#10B981; border:2.5px solid #FFFFFF; box-shadow:0 0 0 1px #10B981;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12.5px; font-weight:700; color:var(--sys-label-primary);">弁護士に依頼</span>
+                  <span style="font-size:11px; color:var(--sys-label-secondary); font-family:monospace;">9/11</span>
+                </div>
+              </div>
+
+              <!-- ステップ 3: 申立（Step 03 コンテンツ提供者） -->
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#10B981; border:2.5px solid #FFFFFF; box-shadow:0 0 0 1px #10B981;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12.5px; font-weight:700; color:var(--sys-label-primary);">申立（Step 03 コンテンツ提供者）</span>
+                  <span style="font-size:11px; color:var(--sys-label-secondary); font-family:monospace;">10/20</span>
+                </div>
+              </div>
+
+              <!-- ステップ 4: いま・今日 10/26 (アクティブカード) -->
+              <div style="position:relative; margin-bottom:16px;">
+                <div style="position:absolute; left:-22px; top:4px; width:14px; height:14px; border-radius:50%; background:#FF6E6E; border:2.5px solid #FFFFFF; box-shadow:0 0 0 2px #FF6E6E;"></div>
+                
+                <div style="background:linear-gradient(135deg, rgba(255,138,101,0.12) 0%, rgba(255,110,110,0.16) 100%); border:1.5px solid #FF8A65; border-radius:14px; padding:10px 12px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-size:11px; font-weight:800; color:var(--accent-peach-text);">いま・今日 10/26</span>
+                    <span style="font-size:9.5px; font-weight:800; background:#10B981; color:#FFFFFF; padding:1.5px 6px; border-radius:4px;">次回期日決定済</span>
+                  </div>
+                  <div style="font-size:14px; font-weight:800; color:#1E1B2E; margin-bottom:2px;">
+                    X側のIP開示待ち
+                  </div>
+                  <div style="font-size:11px; color:var(--sys-label-secondary); margin-bottom:8px;">
+                    アクセスログ保存申請済
+                  </div>
+
+                  <!-- 白枠期日カード -->
+                  <div style="background:#FFFFFF; border-radius:10px; padding:8px 10px; border:1px solid rgba(255,138,101,0.3); display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:16px;">📅</span>
+                    <div>
+                      <div style="font-size:10px; font-weight:700; color:var(--accent-peach-text);">次回期日 - 口頭弁論</div>
+                      <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">11/12（木）13:30</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ステップ 5: 期日 10/30 (予定) -->
+              <div style="position:relative; margin-bottom:14px;">
+                <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#CBD5E1; border:2.5px solid #FFFFFF;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">期日</span>
+                  <span style="font-size:11px; color:var(--sys-label-tertiary); font-family:monospace;">10/30</span>
+                </div>
+              </div>
+
+              <!-- ステップ 6: 開示 予定 -->
+              <div style="position:relative;">
+                <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#CBD5E1; border:2.5px solid #FFFFFF;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">開示</span>
+                  <span style="font-size:11px; color:var(--sys-label-tertiary);">予定</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. 投稿情報（3Dメーターなし！画面幅いっぱいの端正なテーブル ＆ 編集リンク） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">投稿情報</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">編集</div>
+          </div>
+
+          <div class="card" style="padding:4px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">投稿No.</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary); font-family:monospace;">20081001</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">投稿日時</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">2026/08/10 21:18</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">罪状</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">名誉毀損・侮辱・名誉感情侵害</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">いまの状況</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">X側IP開示待ち</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">証拠</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary); font-family:monospace;">証拠_20081001.png</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">状態</span>
+              <span style="font-size:10.5px; font-weight:800; background:rgba(255,117,87,0.15); color:var(--accent-peach-text); padding:2px 8px; border-radius:6px;">未解決</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">URL</span>
+              <span style="font-size:11.5px; font-weight:700; color:var(--accent-peach-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px; font-family:monospace;">x.com/dummy_jiro/status/...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. 担当弁護士チャット（インラインチャット ＆ 送信バー） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">担当弁護士チャット</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">すべて表示</div>
+          </div>
+
+          <div class="card" style="padding:14px 12px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04); display:flex; flex-direction:column; gap:10px;">
+            <!-- 弁護士からの吹出 -->
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+              <div style="width:28px; height:28px; border-radius:50%; background:#475569; color:#FFFFFF; font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none;">
+                神
+              </div>
+              <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
+                東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。
+                <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">17:15</div>
+              </div>
+            </div>
+
+            <!-- ユーザーからの返信吹出 -->
+            <div style="display:flex; justify-content:flex-end;">
+              <div style="background:linear-gradient(135deg, #FF8A65 0%, #FF6E6E 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(255,110,110,0.25);">
+                ご連絡ありがとうございます！仮処分決定で安心しました。引き続きよろしくお願いいたします。
+                <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">既読 17:18</div>
+              </div>
+            </div>
+
+            <!-- チャットメッセージ入力欄 -->
+            <div style="display:flex; gap:6px; margin-top:4px; padding-top:8px; border-top:1px solid var(--sys-separator);">
+              <input type="text" placeholder="弁護士へメッセージ..." style="flex:1; border:1px solid rgba(155,143,178,0.24); border-radius:20px; padding:6px 12px; font-size:12px; outline:none; background:#FAF9F7;" readonly>
+              <button style="background:var(--sunrise-grad); color:#FFFFFF; border:none; border-radius:20px; padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer;">送信</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. 関連書類・証拠ファイル（4件リスト ＆ 追加リンク） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">関連書類・証拠ファイル</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">追加</div>
+          </div>
+
+          <div class="card" style="padding:4px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
+            <!-- 書類 1 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <div>
+                <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">発信者情報開示命令申立書</div>
+                <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:1px;">PDF・324KB</div>
+              </div>
+              <span style="font-size:10px; font-weight:800; background:rgba(16,185,129,0.14); color:#047857; padding:2px 8px; border-radius:6px;">提出済</span>
+            </div>
+
+            <!-- 書類 2 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <div>
+                <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">侵害情報通知書兼送信防止措置依頼書</div>
+                <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:1px;">PDF・188KB</div>
+              </div>
+              <span style="font-size:10px; font-weight:800; background:rgba(16,185,129,0.14); color:#047857; padding:2px 8px; border-radius:6px;">提出済</span>
+            </div>
+
+            <!-- 書類 3 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <div>
+                <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">陳述書（被害経緯・精神的苦痛）</div>
+                <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:1px;">PDF・ひな形</div>
+              </div>
+              <span style="font-size:10px; font-weight:800; background:rgba(255,117,87,0.14); color:var(--accent-peach-text); padding:2px 8px; border-radius:6px;">作成予定</span>
+            </div>
+
+            <!-- 書類 4 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+              <div>
+                <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">証拠_20081001.png（魚拓画像）</div>
+                <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:1px;">PNG・1.2MB</div>
+              </div>
+              <span style="font-size:10px; font-weight:800; background:rgba(16,185,129,0.14); color:#047857; padding:2px 8px; border-radius:6px;">保全済み</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10. 担当弁護士（連絡先カード ＆ 連絡リンク） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">担当弁護士</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">連絡</div>
+          </div>
+
+          <div class="card" style="padding:4px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">事務所</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">神田法律事務所</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">担当弁護士</span>
+              <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">神田 敬一 弁護士</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">電話番号</span>
+              <span style="font-size:12.5px; font-weight:800; color:var(--accent-peach-text);">03-3500-1234</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">メール</span>
+              <span style="font-size:12px; font-weight:700; color:var(--accent-peach-text);">kanda@kanda-law.jp</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 11. 手続メモ・特記事項（メモカード ＆ 編集リンク） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">手続メモ・特記事項</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">編集</div>
+          </div>
+
+          <div class="card" style="padding:12px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
+            <p style="font-size:12px; line-height:1.6; color:var(--sys-label-primary); margin:0;">
+              10/20 受領決定にてログ保存を要請。11/12までにX社からの開示予定。受領後は直ちにプロバイダ宛発信者情報消去・ログ保存命令の申立をする。
+            </p>
+          </div>
+        </div>
+
+        <!-- 12. 「終了・取下」時の取扱（プレビューリンク） -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">「終了・取下」時の取扱</div>
+            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">プレビュー</div>
+          </div>
+
+          <div class="card" style="padding:12px 14px; background:rgba(155,143,178,0.08); border:1px dashed rgba(155,143,178,0.24); border-radius:18px;">
+            <p style="font-size:11.5px; line-height:1.55; color:var(--sys-label-secondary); margin:0;">
+              裁判外での示談又は訴訟が終了した際は、合意内容に基づき相手方のアカウント情報や投稿が消去・アーカイブされます。
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 13. 最下部固定タブバー（中央はみ出し丸型FAB付き） -->
+      <div class="tabbar">
+        <div class="tab on"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+        <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+        <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+    <!-- 2. アカウント一覧ビュー -->
+    <div id="view-accounts" class="view-page">
+      <div class="screen">
+      <div class="navbar">
+        
+        <div class="nav-row">
+          <span class="nav-btn"><svg class="sf"><use href="#ic-sort"/></svg>並替</span>
+          <span class="nav-btn strong"><svg class="sf"><use href="#ic-plus"/></svg>URLで投稿を追加</span>
+        </div>
+        <div class="search-wrap">
+          <div class="search-field">
+            <svg class="sf sf-sm"><use href="#ic-search"/></svg>
+            <span>検索（名前・IDなど）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content flat-list-mode">
+        <div class="flat-list">
+          
+          <div class="flat-row">
+            <div class="monogram">サ</div>
+            <div class="cell-body">
+              <div class="c-title">サンプル太郎</div>
+              <div class="c-handle">X · @sample_user01</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle open">2件 ▾</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+          <div class="flat-tree-children">
+            <div class="flat-tree-inner">
+              <div class="flat-sub-row">
+                <span class="c-num">#01</span>
+                <span style="color:var(--sys-label-secondary)">2026/09/02</span>
+                <span class="sub-status" style="color:var(--sys-orange);font-weight:600">03 書類発送待ち</span>
+                <span class="chevron">›</span>
+              </div>
+              <div class="flat-sub-row">
+                <span class="c-num">#09</span>
+                <span style="color:var(--sys-label-secondary)">2026/10/18</span>
+                <span class="sub-status">01 弁護士に連絡済み</span>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram" style="font-size:12px">5ch</div>
+            <div class="cell-body">
+              <div class="c-title">しつこい人A</div>
+              <div class="c-handle">5ch · 〇〇スレ（呼び名）</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">3件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">ダ</div>
+            <div class="cell-body">
+              <div class="c-title">ダミー次郎</div>
+              <div class="c-handle">X · @dummy_jiro · 本名特定済</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">2件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">例</div>
+            <div class="cell-body">
+              <div class="c-title">例のアカウント</div>
+              <div class="c-handle">X · @example_acc</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">1件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">匿</div>
+            <div class="cell-body">
+              <div class="c-title">匿名レス88</div>
+              <div class="c-handle">5ch · 〇〇スレ &gt;&gt;88 · 本名特定済</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">1件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">ア</div>
+            <div class="cell-body">
+              <div class="c-title">アンチアカウントZ</div>
+              <div class="c-handle">X · @anti_z99 · 本名特定済</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">1件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tabbar">
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+  <div class="tab on"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+  <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+  <div class="tab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+</div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+    <!-- 2-B. アカウント詳細ビュー -->
+    <div id="view-account-detail" class="view-page">
+      <div class="subpage-nav-bar">
+        <button class="back-btn" onclick="switchView('view-accounts')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          アカウント
+        </button>
+        <span class="subpage-title">アカウント詳細</span>
+        <div style="width:60px;"></div>
+      </div>
+      <div class="screen">
+      
+
+      <div class="nav-header">
+        <div class="nav-back-link">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>投稿</span>
+        </div>
+      </div>
+
+            <!-- ご指示反映：③と同じ角丸ピル形状タブ -->
+      <div style="display:flex; gap:5px; background:rgba(155,143,178,0.12); padding:3.5px; border-radius:12px; margin: 6px 12px 10px;">
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">投稿</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:800; background:#FFFFFF; color:var(--sys-label-primary); border-radius:9px; box-shadow:0 2px 6px rgba(0,0,0,0.06); cursor:pointer;">アカウント</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">発信者</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">書類</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); display:flex; align-items:center; justify-content:center; gap:2px; cursor:pointer;">チャット<span style="background:var(--accent-peach); color:#fff; font-size:8.5px; font-weight:800; padding:1px 4px; border-radius:6px;">2</span></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- 3. 発信者一覧ビュー -->
+    <div id="view-senders" class="view-page">
+      <div class="screen">
+      <div class="navbar">
+        
+        <div class="nav-row">
+          <span class="nav-btn"><svg class="sf"><use href="#ic-sort"/></svg>並替</span>
+          <span class="nav-btn strong"><svg class="sf"><use href="#ic-plus"/></svg>新規本名を登録</span>
+        </div>
+        <div class="search-wrap">
+          <div class="search-field">
+            <svg class="sf sf-sm"><use href="#ic-search"/></svg>
+            <span>検索（名前・IDなど）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content flat-list-mode">
+        <div class="flat-list">
+          
+          <div class="flat-row">
+            <div class="monogram">山</div>
+            <div class="cell-body">
+              <div class="c-title">山田 太郎</div>
+              <div class="c-handle">東京都〇〇区 · 2件が同一人物</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle open">2件 ▾</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+          <div class="flat-tree-children">
+            <div class="flat-tree-inner">
+              <div class="flat-sub-row" style="justify-content:space-between">
+                <span style="color:var(--sys-label-secondary);font-size:11.5px">合算示談 / 期日</span>
+                <span style="font-size:12px"><b style="color:var(--sys-label-primary)">300,000円</b> · <span style="color:var(--sys-red);font-weight:600">10/31期日</span></span>
+              </div>
+              <div class="flat-sub-row">
+                <span class="c-num">#04</span>
+                <span style="color:var(--sys-label-secondary)">X @dummy_jiro</span>
+                <span class="sub-status">11 振込待ち</span>
+                <span class="chevron">›</span>
+              </div>
+              <div class="flat-sub-row">
+                <span class="c-num">#05</span>
+                <span style="color:var(--sys-label-secondary)">5ch 〇〇スレ &gt;&gt;88</span>
+                <span class="sub-status">11 振込待ち</span>
+                <span class="chevron">›</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">佐</div>
+            <div class="cell-body">
+              <div class="c-title">佐藤 花子</div>
+              <div class="c-handle">大阪府〇〇市 · 振込完了（40万円）</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">1件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+          <div class="flat-row">
+            <div class="monogram">高</div>
+            <div class="cell-body">
+              <div class="c-title">高橋 健太</div>
+              <div class="c-handle">神奈川県〇〇市 · 10 示談交渉中</div>
+            </div>
+            <div class="dual-btn-group">
+              <span class="btn-subtab-toggle">1件 ▸</span>
+              <span class="btn-open-detail">詳細 ›</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tabbar">
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+  <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+  <div class="tab on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+</div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+    <!-- 3-B. 発信者詳細ビュー -->
+    <div id="view-sender-detail" class="view-page">
+      <div class="subpage-nav-bar">
+        <button class="back-btn" onclick="switchView('view-senders')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          発信者
+        </button>
+        <span class="subpage-title">発信者特定情報</span>
+        <div style="width:60px;"></div>
+      </div>
+      <div class="screen">
+      
+
+      <div class="nav-header">
+        <div class="nav-back-link">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>投稿</span>
+        </div>
+      </div>
+
+            <!-- ご指示反映：③と同じ角丸ピル形状タブ -->
+      <div style="display:flex; gap:5px; background:rgba(155,143,178,0.12); padding:3.5px; border-radius:12px; margin: 6px 12px 10px;">
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">投稿</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">アカウント</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:800; background:#FFFFFF; color:var(--sys-label-primary); border-radius:9px; box-shadow:0 2px 6px rgba(0,0,0,0.06); cursor:pointer;">発信者</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">書類</div>
+        <div style="flex:1; text-align:center; padding:6px 3px; font-size:11px; font-weight:700; color:var(--sys-label-secondary); display:flex; align-items:center; justify-content:center; gap:2px; cursor:pointer;">チャット<span style="background:var(--accent-peach); color:#fff; font-size:8.5px; font-weight:800; padding:1px 4px; border-radius:6px;">2</span></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- 4. 設定 & 全体手続Q&Aビュー (画面⑭ SVGフローチャート ＆ アコーディオン) -->
+    <div id="view-qa" class="view-page">
+      <div class="screen">
+      
+
+      <div class="navbar" style="background:transparent; border-bottom:1px solid rgba(0,0,0,0.05); padding-top:40px;">
+        <div class="nav-row" style="justify-content:space-between; padding:10px 16px;">
+          <span style="font-size:20px; font-weight:800; color:#1D192B;">その他・Q&A</span>
+          <button id="btn-cloud-status" class="nav-btn" onclick="openAuthModal()" style="border:none; background:rgba(59,130,246,0.12); color:#2563EB; font-weight:700; border-radius:14px; padding:4px 10px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+            <span id="cloud-status-icon">☁️</span> <span id="cloud-status-text">クラウド連携</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content" style="padding:14px 12px 18px; overflow:visible;">
+        <!-- アカウント情報 -->
+        <div style="display:flex; gap:10px; align-items:center; background:#fff; border:1px solid rgba(155, 143, 178, 0.2); border-radius:12px; padding:10px 12px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+          <div style="width:34px; height:34px; border-radius:50%; background:var(--accent-coral-grad); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; flex:none;">被</div>
+          <div>
+            <div style="font-size:12px; font-weight:800; color:#2f2a4a;">被害者・依頼者アカウント</div>
+            <div style="font-size:9.5px; color:#7a7690; margin-top:1px;">Google認証連携済・担当: 神田法律事務所</div>
+          </div>
+        </div>
+
+        <!-- Googleスプレッドシート ＆ Googleドライブ連携・初期構築セクション -->
+        <div class="gs-card" id="gs-integration-card">
+          <div class="gs-head">
+            <div class="gs-title">
+              <span>📊 スプレッドシート ＆ ドライブ連携</span>
+            </div>
+            <span class="gs-status-badge" id="gs-conn-badge">フォーマット構築可</span>
+          </div>
+          <div class="gs-desc">
+            弁護士管理用の投稿記事目録（掲示板・X）・費用管理シートと、アプリの案件詳細・証拠魚拓（Googleドライブ保管）・タスクを双方向連携します。
+          </div>
+
+          <!-- 連携先URL / ID 設定フォーム -->
+          <div class="gs-input-group">
+            <div class="gs-field">
+              <label>
+                <span>📗 Googleスプレッドシート URL / ID</span>
+                <a onclick="openLinkedGoogleUrl('sheet')">シートを開く ↗</a>
+              </label>
+              <input type="url" id="gs-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." oninput="saveGsConfig()">
+            </div>
+            <div class="gs-field">
+              <label>
+                <span>📁 Googleドライブ 証拠・書類保管フォルダ URL / ID</span>
+                <a onclick="openLinkedGoogleUrl('drive')">ドライブを開く ↗</a>
+              </label>
+              <input type="url" id="gs-drive-url" placeholder="https://drive.google.com/drive/folders/..." oninput="saveGsConfig()">
+            </div>
+            <div class="gs-field">
+              <label>
+                <span>⚙️ GAS Webアプリ同期URL（Apps Script）</span>
+                <a onclick="toggleGasGuide()">初期構築の手順 ▾</a>
+              </label>
+              <input type="url" id="gs-gas-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveGsConfig()">
+            </div>
+            <div class="gs-btn-row" style="margin-top:2px;">
+              <button type="button" class="gs-btn primary" onclick="syncWithGoogleSheets()">
+                🔄 スプレッドシートと同期
+              </button>
+              <button type="button" class="gs-btn" onclick="copyGasSetupScript()">
+                ⚡ 自動構築GASをコピー
+              </button>
+            </div>
+          </div>
+
+          <!-- GAS初期構築手順（折りたたみ） -->
+          <div id="gs-gas-guide" style="display:none; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:11px; color:#166534; line-height:1.5;">
+            <div style="font-weight:800; margin-bottom:4px;">🚀 1分で終わる！スプレッドシート＆ドライブ初期構築手順</div>
+            <div>① 新規Googleスプレッドシートを開き、メニューの<b>「拡張機能」＞「Apps Script」</b>を開く</div>
+            <div>② 上の<b>「⚡ 自動構築GASをコピー」</b>を押し、Apps Scriptに貼り付けて保存（💾）</div>
+            <div>③ 関数 <b><code>setupSpreadsheetAndDrive</code></b> を選んで<b>「実行」</b>を押すだけ！</div>
+            <div style="margin-top:4px; color:#047857;">→ <b>全5シート（掲示板目録・X目録・費用管理の数式・タスク・書類Drive）</b>と、Googleドライブの<b>「開示請求_証拠魚拓・書類保管庫」フォルダ（3階層）</b>が全自動で構築されます！</div>
+          </div>
+
+          <!-- スプレッドシート フォーマット＆実データ プレビュー（5シート切替） -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <div style="font-size:12px; font-weight:800; color:#1E293B;">📋 スプレッドシート設計フォーマット（全5シート）</div>
+            <div style="display:flex; gap:4px;">
+              <button type="button" onclick="downloadCurrentSheetCsv()" style="border:1px solid #CBD5E1; background:#fff; color:#0F172A; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">📥 このシートCSV</button>
+              <button type="button" onclick="downloadAllSheetsCsv()" style="border:none; background:#065F46; color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">📦 全5シートCSV</button>
+            </div>
+          </div>
+
+          <div class="gs-col-legend">
+            <span><i style="background:#E8F5E9;"></i>弁護士標準列（掲示板・X・費用管理 必須項目）</span>
+            <span><i style="background:#FEF3C7;"></i>アプリ逆算列（案件詳細・魚拓・進捗・タスク・分析連携）</span>
+          </div>
+
+          <div class="gs-sheet-tabs" id="gs-sheet-tabs">
+            <div class="gs-sheet-tab on" data-sheet="bbs" onclick="switchGsPreviewSheet('bbs')">① 掲示板目録 (29列)</div>
+            <div class="gs-sheet-tab" data-sheet="x" onclick="switchGsPreviewSheet('x')">② X(Twitter)目録 (27列)</div>
+            <div class="gs-sheet-tab" data-sheet="cost" onclick="switchGsPreviewSheet('cost')">③ 費用・入金管理 (11列)</div>
+            <div class="gs-sheet-tab" data-sheet="tasks" onclick="switchGsPreviewSheet('tasks')">④ タスク・ボール (8列)</div>
+            <div class="gs-sheet-tab" data-sheet="docs" onclick="switchGsPreviewSheet('docs')">⑤ 書類・Drive (8列)</div>
+          </div>
+
+          <div class="gs-table-wrap" id="gs-preview-table-wrap"></div>
+        </div>
+
+        <!-- よくある質問・Q&A -->
+        <div style="font-size:12px; font-weight:800; color:#2f2a4a; margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+          <span>❓ よくある質問・Q&A</span>
+        </div>
+
+        <div class="qa-box-card">
+          <div class="q">Q. 開示請求にかかる全体の期間は？<span>▼</span></div>
+          <p>IP開示まで約1〜2ヶ月、プロバイダ特定・本名開示まで約3〜6ヶ月、示談・判決まで約6〜10ヶ月が目安です。</p>
+        </div>
+        <div class="qa-box-card">
+          <div class="q">Q. 相手が投稿を削除した場合は？<span>▼</span></div>
+          <p>魚拓スクショやURL保全データ（タイムスタンプ・ハッシュ値）があれば、削除後でも裁判所に証拠として提出可能です。</p>
+        </div>
+        <div class="qa-box-card">
+          <div class="q">Q. 家族や職場に知られずに進められる？<span>▼</span></div>
+          <p>「秘匿事項届出」制度を利用し、被害者の本名や住所を相手方に開示せず非公開のまま進行できます。</p>
+        </div>
+
+        <!-- ご提供のSVGフローチャート（完全そのまま組み込み） -->
+        <div class="qa-svg-panel">
+          <h3>🗺️ 開示手続の全体フローチャート</h3>
+          <svg viewBox="10 18 510 1386" xmlns="http://www.w3.org/2000/svg" font-family="Hiragino Sans, Noto Sans JP, sans-serif">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b9b2c9"/></marker>
+              <linearGradient id="fin" x1="0" x2="1"><stop offset="0" stop-color="#ef7f63"/><stop offset="1" stop-color="#f19a86"/></linearGradient>
+              <filter id="sh" x="-10%" y="-20%" width="120%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#ef7f63" flood-opacity=".3"/></filter>
+            </defs>
+
+            <!-- ===== 線 ===== -->
+            <g fill="none" stroke="#b9b2c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M196 82 V143" marker-end="url(#ah)"/>
+              <path d="M196 106 Q196 114 204 114 H394 Q402 114 402 122 V143" marker-end="url(#ah)"/>
+              <path d="M196 204 V262" marker-end="url(#ah)"/>
+              <path d="M196 319 V370" marker-end="url(#ah)"/>
+              <path d="M196 431 V462 Q196 470 188 470 H105 Q97 470 97 478 V508" marker-end="url(#ah)"/>
+              <path d="M196 462 Q196 470 204 470 H286 Q294 470 294 478 V510" marker-end="url(#ah)"/>
+              <path d="M176 540 H215"/>
+              <path d="M196 540 V627" marker-end="url(#ah)"/>
+              <path d="M196 576 Q196 584 204 584 H394 Q402 584 402 592 V627" marker-end="url(#ah)"/>
+              <path d="M196 683 V745" marker-end="url(#ah)"/>
+              <path d="M196 802 V863" marker-end="url(#ah)"/>
+              <path d="M196 924 V982" marker-end="url(#ah)"/>
+              <path d="M196 946 Q196 954 204 954 H394 Q402 954 402 962 V982" marker-end="url(#ah)"/>
+              <path d="M196 1042 V1100" marker-end="url(#ah)"/>
+              <path d="M196 1064 Q196 1072 204 1072 H515"/>
+              <path d="M402 1072 V1100" marker-end="url(#ah)"/>
+              <path d="M196 1161 V1219" marker-end="url(#ah)"/>
+              <path d="M196 1183 Q196 1191 204 1191 H394 Q402 1191 402 1199 V1219" marker-end="url(#ah)"/>
+              <path d="M196 1275 V1337" marker-end="url(#ah)"/>
+            </g>
+
+            <!-- ===== ノード ===== -->
+            <g font-size="16" font-weight="700" text-anchor="middle">
+              <!-- 本流 -->
+              <rect x="117" y="27" width="158" height="55" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/>
+              <text x="196" y="60" fill="#24704f">弁護士に連絡済み</text>
+
+              <rect x="117" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="170" fill="#2f2a4a">開示可能性あり<tspan x="196" dy="21">→弁護士が準備中</tspan></text>
+
+              <rect x="117" y="264" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="297" fill="#2f2a4a">私の書類発送待ち</text>
+
+              <rect x="117" y="372" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="397" fill="#2f2a4a">弁護士が申し立て<tspan x="196" dy="21">準備中</tspan></text>
+
+              <rect x="18" y="510" width="158" height="59" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
+              <text x="97" y="535" fill="#d9603f">発信者情報開示命令<tspan x="97" dy="21">＋仮処分</tspan></text>
+
+              <rect x="215" y="512" width="158" height="55" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
+              <text x="294" y="545" fill="#d9603f">発信者情報開示命令</text>
+
+              <rect x="117" y="629" width="158" height="54" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
+              <text x="196" y="661" fill="#d9603f">開示命令</text>
+
+              <rect x="117" y="747" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="780" fill="#2f2a4a">ウェブ期日待ち</text>
+
+              <rect x="117" y="865" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="890" fill="#2f2a4a">ウェブ期日終了<tspan x="196" dy="21">→X側のIP開示待ち</tspan></text>
+
+              <rect x="117" y="984" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="1009" fill="#2f2a4a">IP開示<tspan x="196" dy="21">→プロバイダ待ち</tspan></text>
+
+              <rect x="117" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/>
+              <text x="196" y="1127" fill="#24704f">個人特定<tspan x="196" dy="21">→示談で本人連絡</tspan></text>
+
+              <rect x="117" y="1221" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+              <text x="196" y="1246" fill="#2f2a4a">示談了承<tspan x="196" dy="21">→振込待ち</tspan></text>
+
+              <rect x="117" y="1339" width="158" height="55" rx="10" fill="url(#fin)" filter="url(#sh)"/>
+              <text x="196" y="1372" fill="#fff">振込完了</text>
+
+              <!-- 分岐先 -->
+              <g fill="#7a7690">
+                <rect x="324" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+                <text x="403" y="170">開示可能性低い<tspan x="403" dy="21">→終了</tspan></text>
+
+                <rect x="324" y="629" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+                <text x="403" y="654">開示不可<tspan x="403" dy="21">（裁判所判断）</tspan></text>
+
+                <rect x="324" y="984" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+                <text x="403" y="1007">IP開示不可<tspan x="403" dy="21">（X拒否）</tspan></text>
+
+                <rect x="324" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+                <text x="403" y="1127">個人特定不可<tspan x="403" dy="21">（プロバイダ拒否）</tspan></text>
+
+                <rect x="324" y="1221" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
+                <text x="403" y="1246">示談破棄<tspan x="403" dy="21">→裁判準備中</tspan></text>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+
+      <div class="tabbar">
+        <div class="tab"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+        <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+        <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+        <div class="tab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+    <!-- サブビュー：インスタ風魚拓グリッド（証拠一覧） -->
+    <div id="view-evidence-grid" class="view-page">
+      <div class="subpage-nav-bar">
+        <button class="back-btn" onclick="switchView('view-post-detail')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          詳細へ戻る
+        </button>
+        <span class="subpage-title">証拠魚拓一覧</span>
+        <div style="width:60px;"></div>
+      </div>
+      <div class="screen">
+      
+
+      <div class="nav-header">
+        <div class="nav-back-link">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>投稿</span>
+        </div>
+      </div>
+
+      <!-- 5つの台形インデックスタブ（証拠追加アクティブ！） -->
+      <div class="folder-tabs-bar">
+        <div class="f-tab inactive"><span>投稿詳細</span></div>
+        <div class="f-tab inactive"><span>アカウント詳細</span></div>
+        <div class="f-tab inactive"><span>発信者詳細</span></div>
+        <div class="f-tab active"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg><span>証拠追加</span></div>
+        <div class="f-tab inactive"><span>チャット</span><div class="badge-red-circle">2</div></div>
+      </div>
+
+      <div class="main-card-wrap">
+        <div class="main-card tab-sub-active">
+          <!-- 発信者情報ヘッダー -->
+          <div class="user-row">
+            <div class="avatar-circle">ダ</div>
+            <div class="user-titles">
+              <div class="user-name-line">
+                <span class="u-name">ダミー次郎</span>
+                <span class="x-badge">𝕏</span>
+              </div>
+              <div class="u-handle">@dummy_jiro</div>
+            </div>
+            <div class="poster-no-block">
+              <div class="poster-no-lbl">発信者No.</div>
+              <div class="poster-no-val">260801</div>
+            </div>
+          </div>
+
+          <!-- 指示反映：案内文のすぐ下に新規登録ボタンを配置 -->
+          <div style="background:rgba(255, 117, 87, 0.08); border-left:3.5px solid #FF7557; padding:6px 9px; border-radius:0 8px 8px 0; margin-bottom:6px;">
+            <div style="font-size:9.5px; font-weight:800; color:var(--sys-label-primary);">
+              💡 訴訟や開示請求で使える証拠を登録してください
+            </div>
+            <div style="font-size:8px; color:var(--sys-label-secondary); margin-top:2px; line-height:1.35;">
+              誹謗中傷の投稿画面、URL、日付がわかるスクショを登録すると、弁護士が裁判所提出用の証拠目録に自動整理します。
+            </div>
+          </div>
+
+          <!-- 指示反映：案内文の直下に配置した新規登録ボタン群 -->
+          <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:8px;">
+            <div style="background:var(--sunrise-grad); color:#FFF; border-radius:10px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 3px 8px rgba(255,110,110,0.28); cursor:pointer;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:14px; font-weight:800;">＋</span>
+                <span style="font-size:11px; font-weight:800;">証拠スクショを追加 ＆ 新規登録</span>
+              </div>
+              <span style="font-size:8.5px; background:rgba(255,255,255,0.25); padding:2px 6px; border-radius:4px; font-weight:700;">1タップ</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <div style="flex:1; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:7px; padding:4px 6px; text-align:center; font-size:9px; font-weight:700; color:var(--sys-label-primary); cursor:pointer;">
+                📸 魚拓スクショから登録
+              </div>
+              <div style="flex:1; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:7px; padding:4px 6px; text-align:center; font-size:9px; font-weight:700; color:var(--accent-blue-text); cursor:pointer;">
+                🔗 証拠URLを直接登録
+              </div>
+            </div>
+          </div>
+
+          <!-- 指示反映：魚拓だけインスタみたいにアイコン表示で並ぶイメージ（スクエアグリッド） -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 6px;">
+            <span style="font-size:11px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:4px;">
+              <span>📸 登録済み魚拓（インスタ風アイコン一覧）</span>
+            </span>
+            <span style="font-size:8.5px; color:var(--accent-blue-text); font-weight:700; cursor:pointer;">全3件をグリッド表示 ›</span>
+          </div>
+
+          <div class="insta-gyotaku-grid">
+            <!-- 魚拓 01 (選択中: 𝕏) -->
+            <div class="insta-tile selected">
+              <div class="insta-tile-badge">𝕏</div>
+              <div class="insta-tile-content">
+                <div class="insta-tile-user">@dummy_jiro</div>
+                <div class="insta-tile-text">「〇〇の経歴は全部嘘で犯罪歴が…」</div>
+              </div>
+              <div class="insta-tile-footer">
+                <span class="insta-tile-tag">証拠01</span>
+                <span class="insta-tile-status">✓ 保全済</span>
+              </div>
+            </div>
+
+            <!-- 魚拓 02 (5ch書込) -->
+            <div class="insta-tile">
+              <div class="insta-tile-badge" style="background:#854D0E;">5ch</div>
+              <div class="insta-tile-content">
+                <div class="insta-tile-user">名無しさん</div>
+                <div class="insta-tile-text" style="color:#B45309; background:rgba(180,83,9,0.06);">「784: こいつ前科持ちの詐欺師だろ…」</div>
+              </div>
+              <div class="insta-tile-footer">
+                <span class="insta-tile-tag">証拠02</span>
+                <span class="insta-tile-status">✓ 保全済</span>
+              </div>
+            </div>
+
+            <!-- 魚拓 03 (インスタストーリー) -->
+            <div class="insta-tile">
+              <div class="insta-tile-badge" style="background:#BE185D;">IG</div>
+              <div class="insta-tile-content">
+                <div class="insta-tile-user">@tokyo_rev</div>
+                <div class="insta-tile-text" style="color:#BE185D; background:rgba(190,24,93,0.06);">「被害者の顔写真付き晒しストーリー」</div>
+              </div>
+              <div class="insta-tile-footer">
+                <span class="insta-tile-tag">証拠03</span>
+                <span class="insta-tile-status" style="color:#D97706;">URL紐付待</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 選択した魚拓の原本プレビュー＆詳細（タップで切り替え） -->
+          <div style="background:#FFFFFF; border:1.2px solid rgba(255, 117, 87, 0.35); border-radius:10px; padding:7px 9px; box-shadow:0 2px 6px rgba(255,110,110,0.1); margin-top:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span style="font-size:9.5px; font-weight:800; color:#1E293B; display:flex; align-items:center; gap:4px;">
+                <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span>
+                <span>証拠01 詳細プレビュー（タップ中）</span>
+              </span>
+              <span style="font-size:8px; color:#10B981; font-weight:700; background:rgba(16,185,129,0.12); padding:1px 5px; border-radius:3px;">原本確定 ✓</span>
+            </div>
+            <div style="font-size:8px; color:#475569; line-height:1.35; margin-bottom:5px;">
+              <strong>ファイル:</strong> 証拠_26081001.png（SHA-256照合済）<br>
+              <strong>取得時刻:</strong> 2026/10/14 20:11:14 JST（タイムスタンプ署名）
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button style="flex:1; height:24px; border:1px solid #CBD5E1; background:#FAF5F2; border-radius:6px; font-size:8.5px; font-weight:700; color:#334155; cursor:pointer;">原本画像を開く ↗</button>
+              <button style="flex:1; height:24px; border:none; background:var(--sunrise-grad); border-radius:6px; font-size:8.5px; font-weight:700; color:#FFF; cursor:pointer;">証拠目録へ追加 ✓</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tabbar">
+  <div class="tab on"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+  <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+</div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+    <!-- サブビュー：弁護士チャット全画面スレッド -->
+    <div id="view-chat-thread" class="view-page">
+      <div class="subpage-nav-bar">
+        <button class="back-btn" onclick="goBackView()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          戻る
+        </button>
+        <span class="subpage-title">弁護士メッセージ</span>
+        <div style="width:60px;"></div>
+      </div>
+      <div class="screen">
+      
+
+      <div class="nav-header">
+        <div class="nav-back-link">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>投稿</span>
+        </div>
+      </div>
+
+      <div class="folder-tabs-bar">
+        <div class="f-tab inactive"><span>投稿詳細</span></div>
+        <div class="f-tab inactive"><span>アカウント詳細</span></div>
+        <div class="f-tab inactive"><span>発信者詳細</span></div>
+        <div class="f-tab inactive"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg><span>証拠追加</span></div>
+        <div class="f-tab active"><span>チャット</span><div class="badge-red-circle">2</div></div>
+      </div>
+
+      <div class="main-card-wrap">
+        <div class="main-card tab-sub-active">
+          <!-- 発信者情報ヘッダー -->
+          <div class="user-row">
+            <div class="avatar-circle">ダ</div>
+            <div class="user-titles">
+              <div class="user-name-line">
+                <span class="u-name">ダミー次郎</span>
+                <span class="x-badge">𝕏</span>
+              </div>
+              <div class="u-handle">@dummy_jiro</div>
+            </div>
+            <div class="poster-no-block">
+              <div class="poster-no-lbl">発信者No.</div>
+              <div class="poster-no-val">260801</div>
+            </div>
+          </div>
+
+          <!-- チャットストリーム -->
+          <div class="chat-stream">
+            <div class="chat-msg-row">
+              <div class="chat-msg-bubble lawyer">
+                ダミー次郎の件、X社からIP開示の回答期日が設定されました。
+                <div style="font-size:8.5px;color:var(--sys-label-secondary);text-align:right;margin-top:2px">10:14</div>
+              </div>
+            </div>
+
+            <div class="chat-msg-row">
+              <div class="chat-msg-bubble lawyer">
+                添付の「証拠_26081001.png」をもとに仮処分申立書を起案しています。
+                <div style="font-size:8.5px;color:var(--sys-label-secondary);text-align:right;margin-top:2px">10:15</div>
+              </div>
+            </div>
+
+            <div class="chat-msg-row me">
+              <div class="chat-msg-bubble me">
+                了解しました。よろしくお願いします！
+                <div style="font-size:8.5px;color:rgba(255,255,255,0.8);text-align:right;margin-top:2px">10:20</div>
+              </div>
+            </div>
+
+            <div class="chat-msg-row">
+              <div class="chat-msg-bubble lawyer">
+                新しい書き込み（#04、#07）も「証拠追加」タブに記録されましたので、併せて証拠提出します。
+                <div style="font-size:8.5px;color:var(--sys-label-secondary);text-align:right;margin-top:2px">10:25</div>
+              </div>
+            </div>
+
+            <div class="chat-input-bar">
+              <div class="chat-input-placeholder">メッセージを入力...</div>
+              <div class="chat-send-btn"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tabbar">
+  <div class="tab on"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+  <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+</div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+
+  </div>
+
+  <!-- 下部固定タブバー（案件・分析・ホーム・タスク・その他） -->
+  <nav class="app-tab-bar">
+    <button type="button" class="tab-item" data-tab="cases" onclick="handleTabClick('cases')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M2.5 5.5h7l2 2.5h10v11.5h-19z"/></svg>
+      <span>案件</span>
+    </button>
+    <button type="button" class="tab-item" data-tab="analytics" onclick="handleTabClick('analytics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      <span>分析</span>
+    </button>
+    <button type="button" class="tab-item active" data-tab="home" onclick="handleTabClick('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9h-6v-6h-6v6H3z"/></svg>
+      <span>ホーム</span>
+    </button>
+    <button type="button" class="tab-item" data-tab="tasks" onclick="handleTabClick('tasks')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>タスク</span>
+    </button>
+    <button type="button" class="tab-item" data-tab="more" onclick="handleTabClick('more')">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+      <span>その他</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- クイック登録ハブ モーダル（ポップ浮き上がりカード仕様） -->
+<div id="quick-modal" class="modal-overlay" onclick="closeModalIfOutside(event, this)">
+  <div class="modal-sheet">
+    <div class="modal-drag-bar"></div>
+    <div class="modal-close-row">
+      <button class="modal-close-btn" onclick="closeQuickModal()" title="閉じる">✕</button>
+    </div>
+    <div id="modal-content-area">
+      <div class="screen">
+      
+
+      <!-- タイトル撤廃：iOSアクションシート仕様（ドラッグバー ＆ 右上閉じるボタンのみ） -->
+      <div style="padding: 10px 14px 4px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="width:36px; height:4px; border-radius:2px; background:rgba(155,143,178,0.28); margin:0 auto; margin-left:calc(50% - 18px);"></div>
+        <span class="nav-btn" style="color:var(--sys-label-secondary); font-size:13px; font-weight:600; cursor:pointer;">閉じる</span>
+      </div>
+
+      <div class="content" style="padding:10px 14px 16px;">
+
+        <!-- 指示反映：縦横2段（2×2グリッド）配置 ＆ Apple HIG基準フォントサイズ -->
+        <div class="quick-hub-grid">
+          <!-- 1. 証拠スクショ -->
+          <div class="quick-hub-tile">
+            <div class="quick-hub-icon-box" style="background:rgba(255,117,87,0.14);">📸</div>
+            <div class="quick-hub-title">証拠スクショを登録</div>
+            <div class="quick-hub-sub">魚拓画像・端末内写真から即時保全</div>
+          </div>
+
+          <!-- 2. 書類を登録 -->
+          <div class="quick-hub-tile" style="border-color:#10B981; background:linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%);">
+            <div class="quick-hub-icon-box" style="background:rgba(16,185,129,0.15);">📄</div>
+            <div class="quick-hub-title" style="color:#065F46;">書類を登録</div>
+            <div class="quick-hub-sub" style="color:#047857;">AI読取で該当アカウントを一括検出</div>
+          </div>
+
+          <!-- 3. 証拠URLを登録 -->
+          <div class="quick-hub-tile">
+            <div class="quick-hub-icon-box" style="background:rgba(59,130,246,0.14);">🔗</div>
+            <div class="quick-hub-title">証拠URLを登録</div>
+            <div class="quick-hub-sub">Xや5chのURLから帯付き自動保全</div>
+          </div>
+
+          <!-- 4. 進捗を登録 -->
+          <div class="quick-hub-tile" style="border-color:#FF7557; background:linear-gradient(180deg, #FFFFFF 0%, #FFF8F5 100%);">
+            <div class="quick-hub-icon-box" style="background:rgba(255,117,87,0.16);">⏱️</div>
+            <div class="quick-hub-title" style="color:#C2410C;">進捗を登録</div>
+            <div class="quick-hub-sub" style="color:#9A3412;">最近触った投稿から即時ステータス更新</div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px; background:#FAF5F2; border-radius:12px; padding:12px; border:1px solid rgba(155, 143, 178, 0.22); box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+          <div style="font-size:13px; font-weight:700; color:var(--sys-label-primary); margin-bottom:5px; display:flex; align-items:center; gap:5px;">
+            <span>💡 スマート連携について</span>
+          </div>
+          <div style="font-size:11.5px; color:var(--sys-label-secondary); line-height:1.45;">
+            裁判所に提出・受領した書類をアップロードすると、書類内の全アカウント・投稿を自動抽出し、「一括で進捗登録していいか」確認リストが表示されます。
+          </div>
+        </div>
+      </div>
+
+<div class="tabbar">
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
+  <div class="tab tab-center-plus on" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
+  <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
+</div>
+      <div class="home-indicator"></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- クラウド連携 & Magic Link ログイン モーダル -->
+<div id="auth-modal" class="modal-overlay" onclick="closeModalIfOutside(event, this)">
+  <div class="modal-sheet" style="max-height:85vh; overflow-y:auto;">
+    <div class="modal-drag-bar"></div>
+    <div class="modal-close-row">
+      <button class="modal-close-btn" onclick="closeAuthModal()" title="閉じる">✕</button>
+    </div>
+    <div style="padding:4px 18px 24px;">
+      <div style="font-size:19px; font-weight:800; color:var(--sys-label-primary); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+        <span>☁️ クラウド連携 & アカウント</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--sys-label-secondary); line-height:1.45; margin-bottom:16px;">
+        Supabase（PostgreSQL + Storage）と接続し、担当弁護士との事案共有や証拠PNGの不変保管を行います。
+      </div>
+
+      <!-- ログイン中表示ブロック -->
+      <div id="auth-logged-in-box" style="display:none; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:14px; padding:14px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; font-weight:700; color:#15803D; text-transform:uppercase; letter-spacing:0.5px;">ログイン中</div>
+            <div id="auth-user-email" style="font-size:14px; font-weight:700; color:#166534; margin-top:2px;">user@example.com</div>
+          </div>
+          <button onclick="handleSignOut()" style="border:none; background:#DC2626; color:#fff; font-size:12px; font-weight:600; padding:6px 12px; border-radius:8px; cursor:pointer;">ログアウト</button>
+        </div>
+      </div>
+
+      <!-- 未ログイン時 Magic Link 送信フォーム -->
+      <div id="auth-login-box">
+        <div style="font-size:13px; font-weight:700; color:var(--sys-label-primary); margin-bottom:6px;">
+          メールでログイン（Magic Link）
+        </div>
+        <div style="font-size:11.5px; color:var(--sys-label-secondary); margin-bottom:8px;">
+          パスワード不要。入力したメール宛に届くログイン用URLをタップするだけで認証完了します。
+        </div>
+        <input type="email" id="auth-email-input" placeholder="you@example.com" style="width:100%; box-sizing:border-box; padding:12px 14px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-size:14px; margin-bottom:10px; outline:none; background:#FAFAFA;">
+        <button id="btn-send-magiclink" onclick="handleSendMagicLink()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#2563EB; color:#fff; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+          ✉️ ログインリンクを送信
+        </button>
+      </div>
+
+      <!-- Supabase 設定（手動詳細設定） -->
+      <div style="margin-top:20px; border-top:1px solid rgba(0,0,0,0.08); padding-top:16px;">
+        <details style="font-size:12px;">
+          <summary style="font-weight:700; color:var(--sys-label-secondary); cursor:pointer; margin-bottom:8px;">
+            ⚙️ Supabase 接続先の手動設定
+          </summary>
+          <div style="background:#F8FAFC; border-radius:10px; padding:12px; border:1px solid rgba(0,0,0,0.06); margin-top:8px;">
+            <div style="margin-bottom:8px;">
+              <label style="display:block; font-size:11px; font-weight:600; margin-bottom:3px;">Project URL</label>
+              <input type="text" id="cfg-supabase-url" placeholder="https://xxx.supabase.co" style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); font-size:12px;">
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="display:block; font-size:11px; font-weight:600; margin-bottom:3px;">Anon / Public Key</label>
+              <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOi..." style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); font-size:12px;">
+            </div>
+            <button onclick="handleSaveSupabaseConfig()" style="width:100%; padding:8px; border:none; border-radius:8px; background:#475569; color:#fff; font-size:12px; font-weight:600; cursor:pointer;">
+              設定を保存して再接続
+            </button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 証拠URL自動保全（キャプチャ＆魚拓）モーダル -->
+<div id="url-capture-modal" class="modal-overlay" onclick="closeModalIfOutside(event, this)">
+  <div class="modal-sheet" style="max-height:85vh; overflow-y:auto;">
+    <div class="modal-drag-bar"></div>
+    <div class="modal-close-row">
+      <button class="modal-close-btn" onclick="closeUrlCaptureModal()" title="閉じる">✕</button>
+    </div>
+    <div style="padding:4px 18px 24px;">
+      <div style="font-size:19px; font-weight:800; color:var(--sys-label-primary); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+        <span>🔗 証拠URLから自動魚拓保全</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--sys-label-secondary); line-height:1.45; margin-bottom:14px;">
+        対象URLをCloud Run上でログインなしで安全に描画撮影し、正確な取得日時帯とSHA-256ハッシュを付与してクラウド保存します。
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:var(--sys-label-primary);">対象の投稿URL (X / 5chなど)</label>
+        <input type="url" id="capture-url-input" placeholder="https://x.com/username/status/..." style="width:100%; box-sizing:border-box; padding:12px 14px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-size:13.5px; outline:none; background:#FAFAFA;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--sys-label-primary);">侵害類型（複数選択可）</label>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <label style="font-size:12px; background:#F1F5F9; padding:5px 10px; border-radius:16px; cursor:pointer;"><input type="checkbox" name="crime-type" value="名誉毀損" checked> 名誉毀損</label>
+          <label style="font-size:12px; background:#F1F5F9; padding:5px 10px; border-radius:16px; cursor:pointer;"><input type="checkbox" name="crime-type" value="侮辱"> 侮辱</label>
+          <label style="font-size:12px; background:#F1F5F9; padding:5px 10px; border-radius:16px; cursor:pointer;"><input type="checkbox" name="crime-type" value="名誉感情侵害"> 名誉感情侵害</label>
+          <label style="font-size:12px; background:#F1F5F9; padding:5px 10px; border-radius:16px; cursor:pointer;"><input type="checkbox" name="crime-type" value="脅迫"> 脅迫</label>
+          <label style="font-size:12px; background:#F1F5F9; padding:5px 10px; border-radius:16px; cursor:pointer;"><input type="checkbox" name="crime-type" value="プライバシー侵害"> プライバシー侵害</label>
+        </div>
+      </div>
+
+      <!-- キャプチャ実行ボタン -->
+      <button id="btn-exec-capture" onclick="handleExecuteCapture()" style="width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color:#fff; font-size:14.5px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(37,99,235,0.3);">
+        📸 魚拓撮影・証拠保全を実行
+      </button>
+
+      <!-- ローディング・進行ステータス表示 -->
+      <div id="capture-progress-box" style="display:none; margin-top:14px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:12px; padding:12px; text-align:center;">
+        <div style="font-size:13px; font-weight:700; color:#1E40AF; margin-bottom:4px;" id="capture-status-text">
+          Cloud Run でページを描画・撮影中...
+        </div>
+        <div style="font-size:11px; color:#3B82F6;">帯合成 ＆ SHA-256ハッシュ計算中（約5〜15秒）</div>
+      </div>
+
+      <!-- 撮影結果カード -->
+      <div id="capture-result-box" style="display:none; margin-top:14px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:12px;">
+        <div style="font-size:12px; font-weight:700; color:#10B981; margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+          <span>✅ 魚拓証拠の保全が完了しました</span>
+        </div>
+        <div style="font-size:11px; color:#64748B; margin-bottom:4px;">SHA-256 ハッシュ:</div>
+        <div id="result-sha256" style="font-family:monospace; font-size:10px; background:#FFFFFF; padding:6px; border-radius:6px; border:1px solid #CBD5E1; word-break:break-all; margin-bottom:8px;"></div>
+        <div style="text-align:center;">
+          <img id="result-preview-img" src="" alt="証拠プレビュー" style="max-width:100%; max-height:220px; border-radius:8px; border:1px solid #E2E8F0; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:10px;">
+        </div>
+        <button onclick="handleAddToCaseList()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#10B981; color:#fff; font-size:13px; font-weight:700; cursor:pointer;">
+          この投稿を事案一覧に追加
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- トースト表示 -->
+<div id="toast" class="toast-msg"></div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

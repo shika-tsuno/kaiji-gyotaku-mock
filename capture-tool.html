@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>証拠保全 撮影ツール（kaiji-gyotaku）</title>
+  <link rel="stylesheet" href="css/capture.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <a href="./app.html" id="backToAppLink" style="display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#8C6912;background:#FFFDF7;border:1px solid rgba(184,142,30,0.45);padding:5px 12px;border-radius:10px;text-decoration:none;">
+          ‹ 管理アプリに戻る
+        </a>
+      </div>
+      <h1>📸 証拠保全 撮影サービス</h1>
+      <p class="subtitle" id="caseContextSubtitle">投稿URLを渡すと、クラウド上でページを開いて取得日時＋URLの帯付きPNGを作成します</p>
+    </header>
+
+    <!-- 1. 自動撮影カード -->
+    <div class="card">
+      <h2>① URLから自動撮影する（Cloud Run）</h2>
+
+      <div style="margin-bottom: 12px;">
+        <label for="tokenInput">合言葉（CAPTURE_TOKEN）</label>
+        <div class="row" style="margin-bottom: 4px;">
+          <input type="password" id="tokenInput" placeholder="合言葉を入力（ブラウザに自動保存されます）">
+          <button type="button" class="btn-secondary" id="toggleTokenBtn">表示</button>
+        </div>
+        <div class="hint">※一度入力するとこのブラウザに記憶されます。</div>
+      </div>
+
+      <div>
+        <label for="urlInput">撮影したい投稿のURL（X・掲示板など）</label>
+        <div class="row">
+          <input type="url" id="urlInput" placeholder="https://x.com/..." value="https://x.com/ogino_otaku/status/2111665378275586410">
+          <button type="button" id="captureBtn">撮影する</button>
+        </div>
+      </div>
+
+      <div id="statusMsg" class="status"></div>
+
+      <div id="resultBox" class="result-box">
+        <div class="row" style="justify-content: space-between; align-items: center;">
+          <strong>撮影結果</strong>
+          <a id="downloadLink" download="gyotaku.png" style="text-decoration:none;">
+            <button type="button" class="btn-success">💾 PNG画像を保存</button>
+          </a>
+        </div>
+        <div id="metaInfo" class="meta"></div>
+        <div class="preview-wrap">
+          <img id="previewImg" alt="撮影結果プレビュー">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 予備：手動スクショに帯を付ける機能 -->
+    <div class="card">
+      <details>
+        <summary>②【予備】手動で撮ったスクショ画像に「日時＋URLの帯」を付ける</summary>
+        <p class="hint" style="margin-top:8px;">
+          ログイン必須の投稿や鍵アカウントなどで自動撮影できない場合、ご自身で撮ったスクリーンショット画像を選ぶだけで、同じデザインの「日時＋URLの帯」を下に合成できます。
+        </p>
+        <div style="margin-top:12px;">
+          <label for="manualFile">1. スクリーンショット画像を選択</label>
+          <input type="file" id="manualFile" accept="image/*" style="margin-bottom:12px;">
+
+          <label for="manualUrl">2. 帯に記載するURL</label>
+          <input type="url" id="manualUrl" placeholder="https://x.com/..." style="margin-bottom:12px;">
+
+          <label for="manualStamp">3. 帯に記載する取得日時（空欄なら現在時刻）</label>
+          <div class="row">
+            <input type="text" id="manualStamp" placeholder="YYYY-MM-DD HH:MM:SS +09:00">
+            <button type="button" id="manualMakeBtn">帯を合成する</button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script src="js/capture.js"></script>
+</body>
+</html>
