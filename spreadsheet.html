@@ -322,6 +322,7 @@
     <div class="b-tab on" data-sheet="bbs" onclick="selectSheet('bbs')">▾ 投稿記事目録_掲示板</div>
     <div class="b-tab" data-sheet="x" onclick="selectSheet('x')">▾ 投稿記事目録_X</div>
     <div class="b-tab" data-sheet="cost" onclick="selectSheet('cost')">▾ 費用・入金管理</div>
+    <div class="b-tab" data-sheet="lawyers" onclick="selectSheet('lawyers')">▾ 担当弁護士マスタ</div>
     <div class="b-tab" data-sheet="tasks" onclick="selectSheet('tasks')">▾ タスク・ボール管理</div>
     <div class="b-tab" data-sheet="docs" onclick="selectSheet('docs')">▾ 書類・証拠Drive・チャット管理</div>
   </div>
@@ -372,6 +373,12 @@ function selectSheet(key) {
       row.map((val, cIdx) => {
         const addr = `${colLetter(cIdx)}${dispRowNum}`;
         let fx = val;
+        // 掲示板・X目録の自動結合列(S列=18) ＆ 担当弁護士マスタ参照列(V列=21, W列=22)の数式表示
+        if (key === 'bbs' || key === 'x') {
+          if (cIdx === 18) fx = `=TEXTJOIN(CHAR(10),TRUE,M${dispRowNum},N${dispRowNum},IF(O${dispRowNum}="","","〒"&O${dispRowNum}),P${dispRowNum},Q${dispRowNum},R${dispRowNum})`;
+          else if (cIdx === 21) fx = `=IFERROR(VLOOKUP(U${dispRowNum},'担当弁護士マスタ'!$A$2:$F$20,2,FALSE),"")`;
+          else if (cIdx === 22) fx = `=IFERROR(VLOOKUP(U${dispRowNum},'担当弁護士マスタ'!$A$2:$F$20,3,FALSE)&" / "&VLOOKUP(U${dispRowNum},'担当弁護士マスタ'!$A$2:$F$20,4,FALSE),"")`;
+        }
         // 費用管理シートは実物のExcel/Googleスプレッドシート数式を保持
         if (key === 'cost') {
           if (rIdx === 0 && cIdx === 5) fx = '1980000';
@@ -412,6 +419,19 @@ function selectSheet(key) {
       document.getElementById('cell-ref').textContent = cell.dataset.addr;
       document.getElementById('fx-input').value = cell.dataset.fx || cell.textContent;
     });
+    // S列（発信者情報まとめ）に1セル塊データを貼付・入力するとM〜R列へ自動分解！
+    if ((key === 'bbs' || key === 'x') && cell.dataset.addr && cell.dataset.addr.startsWith('S')) {
+      cell.addEventListener('input', () => {
+        if (typeof parseCombinedSenderInfo !== 'function') return;
+        const rowNum = cell.dataset.addr.slice(1);
+        const parsed = parseCombinedSenderInfo(cell.innerText);
+        const map = { M: parsed.name, N: parsed.kana, O: parsed.zip, P: parsed.address, Q: parsed.phone, R: parsed.email };
+        Object.entries(map).forEach(([col, v]) => {
+          const target = container.querySelector(`td[data-addr="${col}${rowNum}"]`);
+          if (target && v) target.textContent = v;
+        });
+      });
+    }
   });
 }
 
