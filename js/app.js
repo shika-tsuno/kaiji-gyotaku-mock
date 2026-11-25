@@ -414,6 +414,23 @@ function closeModalIfOutside(e, modalEl) {
   }
 }
 
+function sendUnifiedChat() {
+  const inp = document.getElementById('unified-chat-input');
+  const list = document.getElementById('unified-chat-list');
+  if (!inp || !list) return;
+  const text = (inp.value || '').trim();
+  if (!text) return;
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex; justify-content:flex-end;';
+  div.innerHTML = `<div style="background:linear-gradient(135deg, #D4553B 0%, #C2432A 100%); color:#FFFFFF; padding:10px 12px; border-radius:14px 14px 4px 14px; font-size:12.5px; line-height:1.5; max-width:82%; box-shadow:0 3px 10px rgba(194,67,42,0.22);">${text.replace(/</g, '&lt;')}<div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">送信済 ${hh}:${mm}</div></div>`;
+  list.appendChild(div);
+  inp.value = '';
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
 function openUnifiedChatAt(label) {
   switchView('view-chat-thread', true);
   if (label) showToast(`統合チャット：${label} を表示`);
