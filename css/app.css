@@ -5598,3 +5598,11 @@ html, body {
   background: rgba(194, 67, 42, 0.08);
   color: #C2432A;
 }
+
+/* ホーム画面ブランドロゴ（透過PNG・48pxヘッダー中央配置） */
+.home-brand-logo {
+  height: 24px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
