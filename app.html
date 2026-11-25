@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125h">
+<link rel="stylesheet" href="css/app.css?v=20261125i">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -33,9 +33,9 @@
 
     <!-- 1. 案件一覧ビュー（第33版 完全移植） -->
     <div id="view-cases" class="view-page sr-view">
+      <div class="main-page-header"><h1>案件一覧</h1></div>
       <div class="sr-body">
         <div class="c33-top">
-          <h1>案件一覧</h1>
           <div class="c33-pills">
             <button type="button" class="c33-pill" id="c33-vb">表示情報<small>▼</small></button>
             <button type="button" class="c33-pill" id="c33-sb">並替: <span id="c33-sl">No.</span> <span id="c33-sd">↑</span></button>
@@ -55,13 +55,8 @@
 
     <!-- 2. 分析・効果測定ビュー（添付2枚目） -->
     <div id="view-analytics" class="view-page sr-view">
+      <div class="main-page-header"><h1>分析・効果測定</h1></div>
       <div class="sr-body">
-        <div class="sr-top has-bubbles">
-          <div>
-            <h1>分析・効果測定</h1>
-            <small>手続きの成果と次の一手のふりかえり</small>
-          </div>
-        </div>
 
         <!-- 手続きの成果カード -->
         <div class="sr-card">
@@ -120,6 +115,7 @@
 
     <!-- 3. ホームビュー（添付1枚目・初期表示） -->
     <div id="view-home" class="view-page sr-view active">
+      <div class="main-page-header"><h1>ホーム</h1></div>
       <div class="sr-body">
         <!-- 開示の進捗（マイルストーン・最上部に配置） -->
         <div class="sr-card">
@@ -263,13 +259,8 @@
 
     <!-- 4. タスクビュー（添付3枚目） -->
     <div id="view-tasks" class="view-page sr-view sr-task-mode">
+      <div class="main-page-header"><h1>タスク</h1></div>
       <div class="sr-body">
-        <div class="sr-top has-bubbles">
-          <div>
-            <h1>タスク</h1>
-            <small>いまやるべきこととボールの状況</small>
-          </div>
-        </div>
 
         <!-- いま ボールを持っているのは？ -->
         <div class="sr-card" id="task-ballcard">
@@ -1182,13 +1173,8 @@
 
     <!-- 5. その他ビュー（1行アコーディオンで下にギュンと開く設計・フッター2重解消） -->
     <div id="view-qa" class="view-page sr-view">
-      <div class="sr-body" style="padding: 8px 16px 32px;">
-        <div class="sr-top" style="padding: 4px 0 12px;">
-          <div>
-            <h1>その他</h1>
-            <small>設定・スプレッドシート連携・手続Q&A</small>
-          </div>
-        </div>
+      <div class="main-page-header"><h1>その他</h1></div>
+      <div class="sr-body" style="padding: 12px 16px 32px;">
 
         <div class="more-acc-list">
 
