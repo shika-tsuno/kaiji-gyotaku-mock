@@ -10,23 +10,21 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="stylesheet" href="css/app.css?v=20261125d">
+<link rel="stylesheet" href="css/app.css?v=20261125e">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
 <div id="app-container">
 
-  <!-- 右上に常時表示される吹き出し（連絡 ＆ ＋追加） -->
+  <!-- 右下に常時フロート表示される丸型アイコンボタン（連絡 ＆ ＋追加） -->
   <div id="top-bubbles" class="sr-top-bubbles">
-    <button type="button" class="sr-bubble-pill" onclick="openChatFromBubble()">
+    <button type="button" class="sr-bubble-pill" onclick="openChatFromBubble()" title="弁護士へ連絡" aria-label="連絡">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>連絡</span>
       <span class="sr-cnt-dot">3</span>
     </button>
-    <button type="button" class="sr-bubble-pill primary" onclick="openQuickModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span>追加</span>
+    <button type="button" class="sr-bubble-pill primary" onclick="openQuickModal()" title="クイック追加" aria-label="追加">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     </button>
   </div>
 
@@ -123,8 +121,6 @@
     <!-- 3. ホームビュー（添付1枚目・初期表示） -->
     <div id="view-home" class="view-page sr-view active">
       <div class="sr-body">
-        <div style="height:56px;"></div>
-
         <!-- 開示の進捗（マイルストーン・最上部に配置） -->
         <div class="sr-card">
           <div class="sr-hd">
@@ -1189,7 +1185,7 @@
       <div class="screen">
       
 
-      <div class="navbar" style="background:transparent; border-bottom:1px solid rgba(0,0,0,0.05); padding-top:40px;">
+      <div class="navbar" style="background:transparent; border-bottom:1px solid rgba(0,0,0,0.05); padding-top:8px;">
         <div class="nav-row" style="justify-content:space-between; padding:10px 16px;">
           <span style="font-size:20px; font-weight:800; color:#1D192B;">その他・Q&A</span>
           <button id="btn-cloud-status" class="nav-btn" onclick="openAuthModal()" style="border:none; background:rgba(59,130,246,0.12); color:#2563EB; font-weight:700; border-radius:14px; padding:4px 10px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
@@ -1901,7 +1897,7 @@
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125c"></script>
+<script src="js/app.js?v=20261125e"></script>
 
 </body>
 </html>

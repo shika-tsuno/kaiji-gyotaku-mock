@@ -259,11 +259,6 @@ function switchView(viewId, recordHistory = true) {
     target.scrollTop = 0;
     currentViewId = viewId;
   }
-  // 右上吹き出しはメイン5タブのみ表示
-  const bubbles = document.getElementById('top-bubbles');
-  if (bubbles) {
-    bubbles.classList.toggle('hidden', !MAIN_VIEW_IDS.has(viewId));
-  }
   // グラフを含むビューが表示されたら幅を再計測して描画
   if (viewId === 'view-analytics' || viewId === 'view-home') {
     requestAnimationFrame(() => {
@@ -375,9 +370,9 @@ function initCasesView() {
 
   const D = [
     { no: 1, name: 'サンプル太郎', sv: 'X', id: '@sample_user01', st: '依頼者待ち', date: '2026-03-14', post: 'A・Bの件、まだ許せません…', snd: '', pv: '', step: 3, k: 'warn', ps: '私の書類発送待ち（期限あと2日）' },
-    { no: 2, name: '例のアカウント', sv: 'X', id: '@example_acc', st: '進行中', date: '2026-05-02', post: '〇〇はいつも嘘ばかり…', snd: '', pv: '', step: 8, k: 'go', ps: 'X側のIP開示待ち（次回期日 11/26）' },
-    { no: 3, name: 'しつこい人A', sv: '5ch', id: '〇〇スレ >>345', st: '準備中', date: '2026-06-21', post: 'あいつの住所知ってる人いる？…', snd: '', pv: '', step: 2, k: 'go', ps: '弁護士が申立て準備中' },
-    { no: 4, name: 'ダミー次郎', sv: 'X', id: '@dummy_jiro', st: '依頼者待ち', date: '2026-08-10', post: '頭おかしいんじゃないの…', snd: '', pv: '', step: 8, k: 'warn', ps: 'Xの回答書が届いた（結果記録待ち）' },
+    { no: 2, name: '例のアカウント', sv: 'X', id: '@example_acc', st: '進行中', date: '2026-05-02', post: '〇〇はいつも嘘ばかり…', snd: '', pv: '朝日ネット', step: 8, k: 'go', ps: 'X側のIP開示待ち（次回期日 11/26）' },
+    { no: 3, name: 'しつこい人A', sv: '5ch', id: '〇〇スレ >>345', st: '準備中', date: '2026-06-21', post: 'あいつの住所知ってる人いる？…', snd: '', pv: 'オプテージ', step: 2, k: 'go', ps: '弁護士が申立て準備中' },
+    { no: 4, name: 'ダミー次郎', sv: 'X', id: '@dummy_jiro', st: '依頼者待ち', date: '2026-08-10', post: '頭おかしいんじゃないの…', snd: '', pv: 'ソフトバンク', step: 8, k: 'warn', ps: 'Xの回答書が届いた（結果記録待ち）' },
     { no: 5, name: '匿名レス88', sv: '5ch', id: '〇〇スレ >>88', st: '進行中', date: '2026-02-08', post: 'また同じこと書いてて草…', snd: '山田 太郎', pv: 'ドコモ', step: 11, k: 'go', ps: '示談了承→振込待ち（11/30）' },
     { no: 6, name: 'アンチアカウントZ', sv: 'X', id: '@anti_z99', st: '終了', date: '2026-01-19', post: '消えてほしい…', snd: '佐藤 花子', pv: 'ソフトバンク', step: 12, k: 'done', ps: '振込完了（40万円・解決）' },
     { no: 7, name: '通りすがりB', sv: 'X', id: '@passerby_b', st: '進行中', date: '2026-09-30', post: 'ネットで有名な〇〇って…', snd: '', pv: '', step: 7, k: 'go', ps: '仮処分の申立て中' },
@@ -391,14 +386,14 @@ function initCasesView() {
   const ICON = { warn: '⚠️ ', go: '→ ', done: '✓ ', stop: '■ ' };
   const ST = ['依頼者待ち', '準備中', '進行中', '終了', '止まった'];
   const SVN = { X: '𝕏 (Twitter)', '5ch': '5ちゃんねる' };
-  const GROUPS = [['sv', '媒体別'], ['st', '進捗別'], ['date', '月別'], ['snd', '発信者別']];
+  const GROUPS = [['sv', '媒体別'], ['st', '進捗別'], ['pv', 'プロバイダ別'], ['date', '月別'], ['snd', '発信者別']];
   const SORTS = [['no', 'No.'], ['date', '投稿日'], ['name', '名前'], ['step', '進捗'], ['st', '状態']];
   const V = { icon: ['アイコン', true], no: ['No.', true], acc: ['アカウント名', true], post: ['投稿内容', false], snd: ['発信者情報', true], ps: ['いまの状況', true], bar: ['進捗バー', true] };
   let G = 'sv', S = 'no', asc = true;
   const closed = new Set();
 
   const KEY = { no: d => d.no, date: d => d.date, name: d => d.name, step: d => d.step, st: d => ST.indexOf(d.st) * 100 + d.step };
-  const gkey = d => G === 'sv' ? SVN[d.sv] : G === 'st' ? d.st : G === 'date' ? d.date.slice(0, 7).replace('-', '年') + '月' : (d.snd && d.snd !== '特定できず' ? d.snd : d.snd || '未特定');
+  const gkey = d => G === 'sv' ? SVN[d.sv] : G === 'st' ? d.st : G === 'pv' ? (d.pv || 'プロバイダ未判明') : G === 'date' ? d.date.slice(0, 7).replace('-', '年') + '月' : (d.snd && d.snd !== '特定できず' ? d.snd : d.snd || '未特定');
 
   function renderChips() {
     $('c33-chips').innerHTML = GROUPS.map(([k, l]) => `<span class="c33-chip${k === G ? ' on' : ''}" data-k="${k}">${l}</span>`).join('') + '<span class="c33-per" id="c33-per">期間指定<small>▼</small></span>';
