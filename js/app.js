@@ -626,6 +626,10 @@ function initCasesView() {
         prev.unshift(item);
         localStorage.setItem('kaiji_added_cases_v1', JSON.stringify(prev.slice(0, 30)));
       } catch {}
+      if (typeof syncAddedCasesToSheetSchema === 'function') syncAddedCasesToSheetSchema();
+      if (typeof renderGsSheetPreview === 'function' && document.getElementById('gs-sheet-preview')) {
+        renderGsSheetPreview(currentGsSheetKey);
+      }
       renderList();
       return item;
     }
@@ -1140,7 +1144,8 @@ const GS_SHEETS_SCHEMA = {
       ['1-1', '黒饅頭\n@VNGssDyFjZ53447', 'https://x.com/VNGssDyFjZ53447/status/1960328033933619288', '午後10:06 · 2025年8月26日', 'ちゃんと診断書アップしろよ\n虚言癖あるんだから', '34.34.226.105', '', '名誉毀損・侮辱', 'Ｇｏｏｇｌｅ ＬＬＣ', '', '2025/09/10', '2025/10/15', '森井 沙伎', 'モリイ サキ', '213-0004', '神奈川県川崎市高津区諏訪2丁目13-2 モルトベーネE', '+819042834063（ＳＢ）', 'shirley.bridal.1201@gmail.com', 'shirley.bridal.1201@gmail.com\n+819042834063（ＳＢ）\n森井沙伎（モリイサキ）\n〒213-0004 神奈川県川崎市高津区諏訪2丁目13-2 モルトベーネE', '2026/01/10', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#06', 'X (Twitter)', '12', '振込完了（40万円・解決）', '終了', '弁護士', '', '', '証拠_19603280.png', 'https://drive.google.com/drive/folders/...', '2025-08-26 22:30:00 JST', '5b71e2a9...1102', '示談成立・40万円の振込完了を確認'],
       ['1-2', 'ORC\n@neutralbrain_', 'https://x.com/neutralbrain_/status/1959106759424913845', '午後1:13 · 2025年8月23日', '周りが追い詰めなくてもあの人は元からあんな感じですよ 家庭内ではDV、不倫してそれを正当化して旦那追い詰めてたんですから表面化したかしてないかの違いだけです', '138.64.174.240', '', '名誉毀損・プライバシー侵害', '朝日ネット', '', '2025/09/15', '2025/10/20', '（プロバイダ照会中）', '', '', '（住所開示待ち）', '', 'net.websf@gmail.com', 'net.websf@gmail.com（プロバイダ照会中）', '', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#02', 'X (Twitter)', '8', 'X側のIP開示待ち（次回期日 11/26）', '進行中', 'あなた', '2026/11/26', 'X側のIP開示 期日', '証拠_19591067.png', 'https://drive.google.com/drive/folders/...', '2025-08-23 14:00:00 JST', '4d12f8c3...9012', 'Xの回答書を読んで返信（ボール：あなた）'],
       ['2-1', 'ダミー次郎\n@dummy_jiro', 'https://x.com/dummy_jiro/status/1846000020081001', '午後8:10 · 2026年8月10日', '〇〇の経歴は全部嘘で犯罪歴もある。こいつのファンも詐欺グループと変わらんわ。店行くだけでもリスク。拡散希望。', '（X社開示待ち）', '', '名誉毀損・侮辱・名誉感情侵害', 'ソフトバンク（見込）', '', '2026/09/11', '2026/10/20', '（開示手続中）', '', '', '', '', '', '（開示手続中）', '', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#04', 'X (Twitter)', '8', 'X側IP開示待ち', '依頼者待ち', '弁護士', '2026/11/12 13:30', '次回期日 - 口頭弁論', '証拠_20081001.png', 'https://drive.google.com/drive/folders/...', '2026-08-10 21:18:24 JST', '8f4a3c10b7e289...d9a04ef12', '10/20 受領決定にてログ保存を要請。11/12までにX社からの開示予定。'],
-      ['3-1', 'サンプル太郎\n@sample_user01', 'https://x.com/sample_user01/status/1845000020031401', '午後3:40 · 2026年3月14日', 'A・Bの件、まだ許せません…', '', '', '名誉毀損', '', '', '2026/03/20', '', '', '', '', '', '', '', '', '', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#01', 'X (Twitter)', '3', '私の書類発送待ち（期限あと2日）', '依頼者待ち', 'あなた', '2026/11/21', '訴訟委任状に署名・押印', '証拠_20031401.png', 'https://drive.google.com/drive/folders/...', '2026-03-14 16:00:00 JST', '1a88e4b0...7712', 'A・Bの委任状に押印して返送待ち']
+      ['3-1', 'サンプル太郎\n@sample_user01', 'https://x.com/sample_user01/status/1845000020031401', '午後3:40 · 2026年3月14日', 'A・Bの件、まだ許せません…', '', '', '名誉毀損', '', '', '2026/03/20', '', '', '', '', '', '', '', '', '', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#01', 'X (Twitter)', '3', '私の書類発送待ち（期限あと2日）', '依頼者待ち', 'あなた', '2026/11/21', '訴訟委任状に署名・押印', '証拠_20031401.png', 'https://drive.google.com/drive/folders/...', '2026-03-14 16:00:00 JST', '1a88e4b0...7712', 'A・Bの委任状に押印して返送待ち'],
+      ['4-1', 'wtp\n@wtpmjgd65924109', 'https://x.com/wtpmjgd65924109/status/2125261688933064998', '1:14 · 2026年11月25日', '⚠️【裁判について】⚠️ あなた、私たちを侮（あなど）ってますか？…', '', '', '名誉毀損・脅迫の疑い', '', '', '', '', '', '', '', '', '', '', '', '', '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp', '#12', 'X (Twitter)', '1', '魚拓保全済・弁護士へ共有待ち', '準備中', 'あなた', '', '', '証拠_2125261688933064998.png', 'https://drive.google.com/drive/folders/...', '2026-11-25 12:21:54 JST', '093b25be5119faee...0a5066f', 'X URLから自動取得（ID: 1280711048140517376 / 閲覧2.8万）']
     ]
   },
   cost: {
@@ -1194,7 +1199,8 @@ const GS_SHEETS_SCHEMA = {
       ['#04', '通知書PDF', '侵害情報通知書兼送信防止措置依頼書', '提出済', '1DriveDoc_Tsuchisho_04', 'https://drive.google.com/file/d/1DriveDoc_Tsuchisho_04/view', 'PDF・188KB', '2026-10-20 提出'],
       ['#04', '陳述書PDF', '陳述書（被害経緯・精神的苦痛）', '作成予定', '1DriveDoc_Chinjutsu_04', 'https://drive.google.com/file/d/1DriveDoc_Chinjutsu_04/view', 'PDF・ひな形', '依頼者確認待ち'],
       ['#04', '魚拓PNG', '証拠_20081001.png（魚拓画像）', '保全済み', '1DrivePng_Gyotaku_04', 'https://drive.google.com/file/d/1DrivePng_Gyotaku_04/view', 'PNG・1.2MB', '保全日時: 2026-08-10 21:18:24 JST / SHA-256: 8f4a3c10b7e289...d9a04ef12'],
-      ['#04', 'チャット', '神田 敬一 弁護士（神田法律事務所）', '既読', '', '', '17:15', '東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。']
+      ['#04', 'チャット', '神田 敬一 弁護士（神田法律事務所）', '既読', '', '', '17:15', '東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。'],
+      ['#12', '魚拓PNG', '証拠_2125261688933064998.png（魚拓画像）', '保全済み', '1DrivePng_Gyotaku_12', 'https://drive.google.com/file/d/1DrivePng_Gyotaku_12/view', 'PNG・751KB', '保全日時: 2026-11-25 12:21:54 JST / SHA-256: 093b25be5119faee...0a5066f']
     ]
   },
   lawyers: {
@@ -1209,6 +1215,41 @@ const GS_SHEETS_SCHEMA = {
     ]
   }
 };
+
+// アプリで「＋」新規追加したX案件（localStorage）をマスター（投稿記事目録_X & 書類管理）へ自動連動
+function syncAddedCasesToSheetSchema() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('kaiji_added_cases_v1') || '[]');
+    if (!Array.isArray(saved) || !saved.length) return;
+    saved.forEach((item, idx) => {
+      const caseNo = '#' + String(item.no).padStart(2, '0');
+      if (!GS_SHEETS_SCHEMA.x.rows.some(r => r[23] === caseNo)) {
+        const fname = `証拠_${item.statusId || item.no}.png`;
+        GS_SHEETS_SCHEMA.x.rows.push([
+          `新-${idx + 1}`,
+          `${item.name}\n${item.id}`,
+          item.url || '',
+          item.timeLabel || item.date || '',
+          (item.fullPost || item.post || '').slice(0, 120),
+          '', '', '権利侵害（確認中）', '', '', '', '', '', '', '', '', '', '', '', '',
+          '神田 敬一', '神田法律事務所', '03-3500-1234 / kanda@kanda-law.jp',
+          caseNo, 'X (Twitter)', String(item.step || 1), item.ps || '魚拓保全済', item.st || '準備中', 'あなた', '', '',
+          fname, 'https://drive.google.com/drive/folders/...', item.capturedAt || '', (item.sha256 || '').slice(0, 24),
+          'アプリ「＋」から自動登録'
+        ]);
+      }
+      if (!GS_SHEETS_SCHEMA.docs.rows.some(r => r[0] === caseNo && r[1] === '魚拓PNG')) {
+        const fname = `証拠_${item.statusId || item.no}.png（魚拓画像）`;
+        GS_SHEETS_SCHEMA.docs.rows.push([
+          caseNo, '魚拓PNG', fname, '保全済み', `1DrivePng_Gyotaku_${item.no}`,
+          `https://drive.google.com/file/d/1DrivePng_Gyotaku_${item.no}/view`, 'PNG・自動保全',
+          `保全日時: ${item.capturedAt || ''} / SHA-256: ${(item.sha256 || '').slice(0, 24)}`
+        ]);
+      }
+    });
+  } catch {}
+}
+syncAddedCasesToSheetSchema();
 
 // 1セルにまとまった発信者情報（プロバイダ回答書コピペ等）を
 // 「氏名 / フリガナ / 郵便番号 / 住所 / 電話番号 / メールアドレス」に自動分解するパーサー
