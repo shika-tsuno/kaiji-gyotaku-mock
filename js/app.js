@@ -721,11 +721,19 @@ function initHomeWidgets() {
     barsEl.querySelectorAll('.sr-col').forEach(el => { el.onclick = () => handleTabClick('cases'); });
   }
 
-  const msEl = document.getElementById('home-ms');
-  if (msEl) {
-    const MED_DEF = { x: ['X', '#111111'], suki: ['好き嫌い.com', '#FFFFFF'], ch5: ['5ちゃんねる', '#2E9E5B'], ig: ['Instagram', '#E1306C'], yt: ['YouTube', '#E53935'] };
-    let MED = {};
-    try { MED = JSON.parse(localStorage.getItem('komaColor') || '{}'); } catch (e) {}
+  const MED_DEF = { x: ['X', '#111111'], suki: ['好き嫌い.com', '#FFFFFF'], ch5: ['5ちゃんねる', '#5A4E52'], ig: ['Instagram', '#A67C68'], yt: ['YouTube', '#C2432A'] };
+  const pawnSvg = (c, d = 0) => `<svg viewBox="0 0 16 24" style="animation-delay:${d * 60}ms"><ellipse cx="8" cy="22" rx="6.5" ry="1.8" fill="rgba(0,24,58,.18)"/><g fill="${c}" stroke="rgba(0,24,58,.45)" stroke-width=".8"><path d="M8 10c-2.6 0-4 5.5-5.2 10.5h10.4C12 15.5 10.6 10 8 10z"/><circle cx="8" cy="6.5" r="4.2"/></g><circle cx="6.6" cy="5.2" r="1.3" fill="#fff" opacity=".5"/></svg>`;
+
+  function getKomaColors() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('komaColor') || '{}'); } catch (e) {}
+    return saved;
+  }
+
+  function renderHomeMilestones() {
+    const msEl = document.getElementById('home-ms');
+    if (!msEl) return;
+    const MED = getKomaColors();
     const mc = k => MED[k] || MED_DEF[k][1];
     const MS = [
       ['スクショ提出', '弁護士へ渡した', ['x', 'suki'], 'done'],
@@ -734,16 +742,49 @@ function initHomeWidgets() {
       ['相手判明', '氏名・住所', ['x', 'yt'], 'later'],
       ['解決', '示談・判決', ['x'], 'goal']
     ];
-    const pawn = (c, d) => `<svg viewBox="0 0 16 24" style="animation-delay:${d * 60}ms"><ellipse cx="8" cy="22" rx="6.5" ry="1.8" fill="rgba(0,24,58,.18)"/><g fill="${c}" stroke="rgba(0,24,58,.45)" stroke-width=".8"><path d="M8 10c-2.6 0-4 5.5-5.2 10.5h10.4C12 15.5 10.6 10 8 10z"/><circle cx="8" cy="6.5" r="4.2"/></g><circle cx="6.6" cy="5.2" r="1.3" fill="#fff" opacity=".5"/></svg>`;
     let ki = 0;
     const used = new Set(MS.flatMap(m => m[2]));
-    msEl.innerHTML = MS.map(([nm, sb, ks, state], i) => {
+    msEl.innerHTML = MS.map(([nm, sb, ks, state]) => {
       const cls = state === 'active' ? ' is-active' : state === 'later' ? ' is-later' : state === 'goal' ? ' goal' : '';
-      return `<div class="sr-mr${cls}"><span class="dot">${state === 'goal' ? '🏁' : ''}</span><span class="nm">${nm}<small>${sb}</small></span><span class="kp">${ks.length ? ks.map(k => pawn(mc(k), ki++)).join('') : '<span class="none">—</span>'}</span><b>${ks.length}<small>件</small></b></div>`;
+      return `<div class="sr-mr${cls}"><span class="dot">${state === 'goal' ? '🏁' : ''}</span><span class="nm">${nm}<small>${sb}</small></span><span class="kp">${ks.length ? ks.map(k => pawnSvg(mc(k), ki++)).join('') : '<span class="none">—</span>'}</span><b>${ks.length}<small>件</small></b></div>`;
     }).join('')
       + `<div class="sr-mleg">${[...used].map(k => `<span><i style="background:${mc(k)}"></i>${MED_DEF[k][0]}</span>`).join('')}</div>`;
     msEl.querySelectorAll('.sr-mr').forEach(el => { el.onclick = () => handleTabClick('cases'); });
   }
+
+  function renderKomaColorSettings() {
+    const listEl = document.getElementById('koma-color-list');
+    if (!listEl) return;
+    const MED = getKomaColors();
+    const mc = k => MED[k] || MED_DEF[k][1];
+    listEl.innerHTML = Object.entries(MED_DEF).map(([k, [label]]) => {
+      const col = mc(k);
+      return `<div class="koma-color-row">
+        <div class="koma-color-left">${pawnSvg(col, 0)}<span>${label}</span></div>
+        <input type="color" class="koma-color-input" data-k="${k}" value="${col}" aria-label="${label}のコマ色">
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('.koma-color-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const cur = getKomaColors();
+        cur[inp.dataset.k] = inp.value;
+        localStorage.setItem('komaColor', JSON.stringify(cur));
+        renderHomeMilestones();
+        const prevSvg = inp.closest('.koma-color-row').querySelector('svg g');
+        if (prevSvg) prevSvg.setAttribute('fill', inp.value);
+      });
+    });
+  }
+
+  window.resetKomaColors = function() {
+    localStorage.removeItem('komaColor');
+    renderHomeMilestones();
+    renderKomaColorSettings();
+    showToast('コマの色を初期設定に戻しました');
+  };
+
+  renderHomeMilestones();
+  renderKomaColorSettings();
 }
 
 /* ============================================================

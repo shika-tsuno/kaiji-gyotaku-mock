@@ -5623,3 +5623,42 @@ html, body {
   background: #FFFFFF;
   pointer-events: none;
 }
+
+/* その他タブ：ホームの媒体コマ色設定 */
+.koma-color-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.koma-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #FAF8F7;
+  border: 1px solid rgba(70, 50, 60, 0.08);
+}
+.koma-color-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2B2433;
+}
+.koma-color-left svg {
+  width: 16px;
+  height: 24px;
+  flex: none;
+}
+.koma-color-input {
+  width: 32px;
+  height: 28px;
+  border: 1px solid rgba(70, 50, 60, 0.20);
+  border-radius: 8px;
+  background: #FFFFFF;
+  padding: 2px;
+  cursor: pointer;
+}
