@@ -349,7 +349,7 @@ function initCasesView() {
   const ST = ['依頼者待ち', '準備中', '進行中', '終了', '止まった'];
   const SVN = { X: '𝕏 (Twitter)', '5ch': '5ちゃんねる' };
   const GROUPS = [['sv', '媒体別'], ['st', '進捗別'], ['date', '月別'], ['snd', '発信者別']];
-  const SORTS = [['no', 'No.'], ['date', '投稿日'], ['name', '名前'], ['step', '進み具合'], ['st', '状態']];
+  const SORTS = [['no', 'No.'], ['date', '投稿日'], ['name', '名前'], ['step', '進捗'], ['st', '状態']];
   const V = { icon: ['アイコン', true], no: ['No.', true], acc: ['アカウント名', true], post: ['投稿内容', false], snd: ['発信者情報', true], ps: ['いまの状況', true], bar: ['進捗バー', true] };
   let G = 'sv', S = 'no', asc = true;
   const closed = new Set();
@@ -1319,8 +1319,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ピルタブ切り替え
-  document.querySelectorAll('#view-post-detail div[style*="border-radius:10px"], #view-post-detail div[style*="border-radius:14px"] > div').forEach(tab => {
+  // カルテ風タブ切り替え
+  document.querySelectorAll('#view-post-detail .karte-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       const text = tab.textContent.trim();
       if (text.includes('書類')) {

@@ -123,6 +123,15 @@
       <div class="sr-body">
         <div style="height:56px;"></div>
 
+        <!-- 開示の進捗（マイルストーン・最上部に配置） -->
+        <div class="sr-card">
+          <div class="sr-hd">
+            <b>開示の進捗</b>
+            <span class="sr-hd-sub">コマ1つ＝案件1件</span>
+          </div>
+          <div class="sr-ms" id="home-ms"></div>
+        </div>
+
         <!-- いま ボールを持っているのは？ -->
         <div class="sr-card" id="home-ballcard">
           <div class="sr-hd"><b>いま ボールを持っているのは？</b></div>
@@ -165,15 +174,6 @@
               <div class="s">これから入金30万 − 支払6.3万</div>
             </div>
           </div>
-        </div>
-
-        <!-- 開示の進みぐあい（マイルストーン） -->
-        <div class="sr-card">
-          <div class="sr-hd">
-            <b>開示の進みぐあい</b>
-            <span class="sr-hd-sub">コマ1つ＝案件1件</span>
-          </div>
-          <div class="sr-ms" id="home-ms"></div>
         </div>
 
         <!-- 手続きの成果 ＆ ふりかえり（ホーム内） -->
@@ -330,57 +330,33 @@
         </div>
       </div>
       <div class="screen">
-      <!-- 1. ステータスバー -->
-      
-
-      <!-- 2. ナビゲーションバー (‹ 投稿一覧 | 投稿詳細 | 共有) -->
-      <div class="nav-header" style="justify-content:space-between; padding: 10px 16px 8px; border-bottom: 1px solid var(--sys-separator);">
-        <div class="nav-back-link" style="color:var(--accent-peach-text); font-size:13.5px; font-weight:700; display:inline-flex; align-items:center; gap:2px; cursor:pointer;">
-          <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2.5; fill:none;"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          投稿一覧
-        </div>
-        <div class="nav-title" style="font-size:15px; font-weight:800; color:var(--sys-label-primary);">投稿詳細</div>
-        <div style="font-size:13px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">共有</div>
-      </div>
-
       <!-- スクロール本文エリア -->
-      <div class="scroll-content" style="padding: 14px 14px 80px; display:flex; flex-direction:column; gap:18px;">
+      <div class="scroll-content" style="padding: 12px 14px 80px; display:flex; flex-direction:column; gap:18px;">
 
-        <!-- 3. 発信者・投稿ヘッダーカード -->
-        <div class="card" style="padding: 12px 14px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04); display:flex; align-items:center; gap:12px;">
-          <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
-            ダ
+        <!-- 3. カルテ風フォルダ見出しタブ（[投稿] [アカウント] [発信者] [書類] [チャット 2]）＋ 名前カード -->
+        <div class="karte-wrap">
+          <div class="karte-tabs">
+            <div class="karte-tab active" data-ktab="post">投稿</div>
+            <div class="karte-tab" data-ktab="account">アカウント</div>
+            <div class="karte-tab" data-ktab="sender">発信者</div>
+            <div class="karte-tab" data-ktab="docs">書類</div>
+            <div class="karte-tab" data-ktab="chat">チャット<span class="karte-badge">2</span></div>
           </div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:16px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:6px;">
-              ダミー次郎
+          <div class="karte-sheet" style="display:flex; align-items:center; gap:12px;">
+            <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
+              ダ
             </div>
-            <div style="font-size:12px; color:var(--sys-label-secondary); margin-top:2px;">
-              X: @dummy_jiro
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:16px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:6px;">
+                ダミー次郎
+              </div>
+              <div style="font-size:12px; color:var(--sys-label-secondary); margin-top:2px;">
+                X: @dummy_jiro
+              </div>
+              <div style="font-size:11px; color:var(--sys-label-tertiary); margin-top:2px;">
+                発信者No. 2008001 ・ 投稿No. 20081001
+              </div>
             </div>
-            <div style="font-size:11px; color:var(--sys-label-tertiary); margin-top:2px;">
-              発信者No. 2008001 ・ 投稿No. 20081001
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 角丸ピル形状の水平タブ ([投稿] [アカウント] [発信者] [書類] [チャット 2]) -->
-        <div style="display:flex; gap:6px; background:rgba(155,143,178,0.12); padding:4px; border-radius:14px;">
-          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:800; background:#FFFFFF; color:var(--sys-label-primary); border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); cursor:pointer;">
-            投稿
-          </div>
-          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
-            アカウント
-          </div>
-          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
-            発信者
-          </div>
-          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); cursor:pointer;">
-            書類
-          </div>
-          <div style="flex:1; text-align:center; padding:7px 4px; font-size:11.5px; font-weight:700; color:var(--sys-label-secondary); display:flex; align-items:center; justify-content:center; gap:3px; cursor:pointer;">
-            チャット
-            <span style="background:var(--accent-peach); color:#fff; font-size:9px; font-weight:800; padding:1px 5px; border-radius:8px;">2</span>
           </div>
         </div>
 
@@ -446,10 +422,10 @@
           </div>
         </div>
 
-        <!-- 6. 手続の進み具合（縦線マイルストーンタイムライン） -->
+        <!-- 6. 手続の進捗（縦線マイルストーンタイムライン） -->
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">手続の進み具合</div>
+            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">手続の進捗</div>
             <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">フロー全体 ›</div>
           </div>
 
@@ -557,7 +533,7 @@
               <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">2026/08/10 21:18</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
-              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">罪状</span>
+              <span style="font-size:12px; font-weight:600; color:var(--sys-label-secondary);">権利侵害の理由</span>
               <span style="font-size:12px; font-weight:700; color:var(--sys-label-primary);">名誉毀損・侮辱・名誉感情侵害</span>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--sys-separator);">
