@@ -5484,3 +5484,117 @@ html, body {
 
 
 
+
+/* 投稿詳細：添付画像サムネイル ＆ 拡大ライトボックス */
+.kd-media-grid {
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  margin: 0 0 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(70, 50, 60, 0.10);
+}
+.kd-media-grid.has-media { display: grid; }
+.kd-media-grid.single { grid-template-columns: 1fr; }
+.kd-media-item {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #F4F2F1;
+  cursor: pointer;
+  overflow: hidden;
+}
+.kd-media-grid.single .kd-media-item { aspect-ratio: 16 / 10; }
+.kd-media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.kd-media-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  background: rgba(30, 24, 42, 0.72);
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+.media-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(20, 16, 26, 0.90);
+  backdrop-filter: blur(8px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.media-lightbox.active { display: flex; }
+.media-lightbox img {
+  max-width: 100%;
+  max-height: 82vh;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  object-fit: contain;
+}
+.media-lightbox-close {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* タスク完了設定（その他）＆「完了済みを隠す」トグル */
+.task-mode-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.task-mode-btn {
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(70, 50, 60, 0.14);
+  background: #FFFFFF;
+  color: #4A3E43;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+}
+.task-mode-btn.on {
+  border-color: #C2432A;
+  background: rgba(194, 67, 42, 0.08);
+  color: #C2432A;
+}
+.task-hide-toggle {
+  display: none;
+  border: 1px solid rgba(70, 50, 60, 0.18);
+  background: #FFFFFF;
+  color: #5A4E52;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.task-hide-toggle.show { display: inline-flex; align-items: center; gap: 4px; }
+.task-hide-toggle.on {
+  border-color: #C2432A;
+  background: rgba(194, 67, 42, 0.08);
+  color: #C2432A;
+}

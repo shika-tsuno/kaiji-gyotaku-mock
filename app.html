@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125m">
+<link rel="stylesheet" href="css/app.css?v=20261125q">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -310,7 +310,8 @@
           <div class="sr-hd">
             <b style="flex:none;">あなたのタスク</b>
             <span class="sr-badge" id="task-tbadge">0</span>
-            <span class="sr-hd-sub" style="margin-left:auto;">作業の種類ごと</span>
+            <button type="button" class="task-hide-toggle" id="task-hide-done-btn" onclick="toggleHideCompletedTasks()" style="margin-left:auto;">完了済みを隠す</button>
+            <span class="sr-hd-sub" id="task-hd-sub" style="margin-left:auto;">作業の種類ごと</span>
           </div>
           <div class="sr-cheer">
             <div class="sr-cheer-chick">🐥</div>
@@ -402,6 +403,9 @@
             <p id="kd-shot-text" style="font-size:12px; line-height:1.55; color:#0F172A; margin:0 0 8px; font-weight:500; white-space:pre-line;">
               〇〇の経歴は全部嘘で犯罪歴もある。こいつのファンも詐欺グループと変わらんわ。店行くだけでもリスク。拡散希望。
             </p>
+
+            <!-- 添付画像サムネイル（タップで原寸拡大） -->
+            <div id="kd-shot-media" class="kd-media-grid"></div>
 
             <div id="kd-shot-time" style="font-size:10px; color:#64748B; margin-bottom:8px;">
               午後8:10 · 2026年8月10日 · <strong style="color:#0F172A;">1.8万</strong> 件の表示
@@ -1221,6 +1225,25 @@
             </div></div></div>
           </div>
 
+          <!-- 1-B. タスク表示設定（完了後の自動非表示） -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">☑️</span>
+              <span class="more-acc-title">タスク完了後の自動非表示</span>
+              <span class="more-acc-tag" id="task-hide-mode-badge">10秒後</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad">
+              <div style="font-size:11.5px; color:#6F6478; margin-bottom:10px; line-height:1.5;">
+                タスクにチェックを入れたあと、一覧から自動で消えるタイミングを選べます。「半日」を選んだときはタスク画面に「完了済みを隠す」ボタンが表示されます。
+              </div>
+              <div class="task-mode-seg">
+                <button type="button" class="task-mode-btn on" id="btn-task-mode-10s" onclick="setTaskHideMode('10s')">10秒後に消す</button>
+                <button type="button" class="task-mode-btn" id="btn-task-mode-12h" onclick="setTaskHideMode('12h')">半日（12時間）後</button>
+              </div>
+            </div></div></div>
+          </div>
+
           <!-- 2. スプレッドシート ＆ Googleドライブ連携 -->
           <div class="more-acc">
             <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
@@ -1883,10 +1906,17 @@
   </div>
 </div>
 
+<!-- 添付画像 原寸拡大ライトボックス -->
+<div id="media-lightbox-modal" class="media-lightbox" onclick="closeMediaLightbox()">
+  <button type="button" class="media-lightbox-close" onclick="closeMediaLightbox()" aria-label="閉じる">✕</button>
+  <img id="media-lightbox-img" src="" alt="添付画像 原寸プレビュー" onclick="event.stopPropagation()">
+  <div style="margin-top:10px; font-size:11px; color:rgba(255,255,255,0.75);">タップで閉じる · 原寸証拠画像</div>
+</div>
+
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125p"></script>
+<script src="js/app.js?v=20261125q"></script>
 
 </body>
 </html>

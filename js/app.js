@@ -224,6 +224,7 @@ async function fetchXMetadataClient(rawUrl) {
       retweets: tw.retweets ?? 0,
       replies: tw.replies ?? 0,
       bookmarks: tw.bookmarks ?? 0,
+      media: (tw.media && Array.isArray(tw.media.all)) ? tw.media.all.map(x => x.url).filter(Boolean) : [],
       statusId
     }
   };
@@ -413,6 +414,55 @@ function closeModalIfOutside(e, modalEl) {
   }
 }
 
+function openMediaLightbox(url) {
+  const modal = document.getElementById('media-lightbox-modal');
+  const img = document.getElementById('media-lightbox-img');
+  if (!modal || !img || !url) return;
+  img.src = url;
+  modal.classList.add('active');
+}
+function closeMediaLightbox() {
+  const modal = document.getElementById('media-lightbox-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function getTaskHideMode() {
+  return localStorage.getItem('kaiji_task_hide_mode') === '12h' ? '12h' : '10s';
+}
+function getHideCompletedFlag() {
+  return localStorage.getItem('kaiji_task_hide_done') === '1';
+}
+function syncTaskHideSettingsUi() {
+  const mode = getTaskHideMode();
+  const hideDone = getHideCompletedFlag();
+  const badge = document.getElementById('task-hide-mode-badge');
+  const b10 = document.getElementById('btn-task-mode-10s');
+  const b12 = document.getElementById('btn-task-mode-12h');
+  const hideBtn = document.getElementById('task-hide-done-btn');
+  const subEl = document.getElementById('task-hd-sub');
+  if (badge) badge.textContent = mode === '12h' ? '半日後' : '10秒後';
+  if (b10) b10.classList.toggle('on', mode === '10s');
+  if (b12) b12.classList.toggle('on', mode === '12h');
+  if (hideBtn) {
+    hideBtn.classList.toggle('show', mode === '12h');
+    hideBtn.classList.toggle('on', hideDone);
+    hideBtn.textContent = hideDone ? '完了済みを表示' : '完了済みを隠す';
+  }
+  if (subEl) subEl.style.display = mode === '12h' ? 'none' : '';
+}
+function setTaskHideMode(mode) {
+  localStorage.setItem('kaiji_task_hide_mode', mode === '12h' ? '12h' : '10s');
+  syncTaskHideSettingsUi();
+  if (window.__renderTasksAll) window.__renderTasksAll();
+  showToast(mode === '12h' ? '完了タスクは半日（12時間）後に非表示になります' : '完了タスクは10秒後に自動で非表示になります');
+}
+function toggleHideCompletedTasks() {
+  const next = !getHideCompletedFlag();
+  localStorage.setItem('kaiji_task_hide_done', next ? '1' : '0');
+  syncTaskHideSettingsUi();
+  if (window.__renderTasksAll) window.__renderTasksAll();
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -450,6 +500,10 @@ function initCasesView() {
       bookmarks: 9,
       capturedAt: '2026-11-25 12:21:54 JST',
       sha256: '093b25be5119faee318f08b312fbc91b8f514271d17e5d55950a94ef80a5066f',
+      media: [
+        'https://pbs.twimg.com/media/HX5yPfhb0AA-qT2.jpg?name=orig',
+        'https://pbs.twimg.com/media/HX5yPfja0AA9ZAf.jpg?name=orig'
+      ],
       snd: '',
       pv: '',
       step: 1,
@@ -552,6 +606,19 @@ function initCasesView() {
     if ($('kd-shot-name')) $('kd-shot-name').textContent = d.name;
     if ($('kd-shot-handle')) $('kd-shot-handle').textContent = d.id;
     if ($('kd-shot-text')) $('kd-shot-text').textContent = d.fullPost || d.post;
+    const mediaEl = $('kd-shot-media');
+    if (mediaEl) {
+      const imgs = Array.isArray(d.media) ? d.media.filter(Boolean) : [];
+      if (imgs.length) {
+        mediaEl.className = 'kd-media-grid has-media' + (imgs.length === 1 ? ' single' : '');
+        mediaEl.innerHTML = imgs.slice(0, 4).map((u, i) =>
+          `<div class="kd-media-item" onclick="openMediaLightbox('${u.replace(/'/g, "\\'")}')"><img src="${u}" alt="添付画像${i + 1}" loading="lazy"><span class="kd-media-badge">原寸 ${i + 1}/${imgs.length}</span></div>`
+        ).join('');
+      } else {
+        mediaEl.className = 'kd-media-grid';
+        mediaEl.innerHTML = '';
+      }
+    }
     if ($('kd-shot-time')) $('kd-shot-time').innerHTML = `${d.timeLabel || d.date} · <strong style="color:#0F172A;">${d.views || '1.8万'}</strong> 件の表示`;
     if ($('kd-shot-stats')) $('kd-shot-stats').innerHTML = `<span>💬 ${d.replies ?? 14}</span><span>🔁 ${d.retweets ?? 42}</span><span>❤️ ${d.likes ?? 128}</span><span>🔖 ${d.bookmarks ?? 19}</span>`;
     if ($('kd-captured-at')) $('kd-captured-at').textContent = `保全日時: ${d.capturedAt || d.date + ' 21:18:24 JST'}`;
@@ -614,6 +681,7 @@ function initCasesView() {
         bookmarks: m.bookmarks ?? 0,
         capturedAt: res.captured || '',
         sha256: res.sha256 || '',
+        media: Array.isArray(m.media) ? m.media : [],
         snd: '',
         pv: '',
         step: 1,
@@ -821,6 +889,16 @@ function initBallsAndTasks() {
     const el = document.getElementById(containerId);
     if (!el) return;
     const mine = B.filter(b => b.o === 'me');
+    const mode = getTaskHideMode();
+    const hideDoneManual = mode === '12h' && getHideCompletedFlag();
+    const expireMs = mode === '12h' ? 12 * 60 * 60 * 1000 : 10 * 1000;
+    const now = Date.now();
+    const isHiddenStep = s => {
+      if (!s[2]) return false;
+      if (hideDoneManual) return true;
+      if (s[3] && (now - s[3]) >= expireMs) return true;
+      return false;
+    };
     let left = 0, total = 0;
     const h = TK.map(([k, ic, nm]) => {
       const it = [];
@@ -829,7 +907,9 @@ function initBallsAndTasks() {
       total += it.length;
       const rest = it.filter(([b, i]) => !b.st[i][2]).length;
       left += rest;
-      return `<div class="sr-tg"><div class="sr-th"><span class="ic">${ic}</span>${nm}<em class="${rest ? 'left' : ''}">${rest ? `のこり${rest}` : '完了 ✓'}</em></div>${it.map(([b, i]) => `<div class="sr-stp${b.st[i][2] ? ' done' : ''}" data-no="${b.no}" data-i="${i}"><span class="ck">✓</span><span class="sr-stp-lbl"><span>${b.st[i][1]}</span><small>${b.no} ${b.nm}</small></span></div>`).join('')}</div>`;
+      const visible = it.filter(([b, i]) => !isHiddenStep(b.st[i]));
+      if (!visible.length) return '';
+      return `<div class="sr-tg"><div class="sr-th"><span class="ic">${ic}</span>${nm}<em class="${rest ? 'left' : ''}">${rest ? `のこり${rest}` : '完了 ✓'}</em></div>${visible.map(([b, i]) => `<div class="sr-stp${b.st[i][2] ? ' done' : ''}" data-no="${b.no}" data-i="${i}"><span class="ck">✓</span><span class="sr-stp-lbl"><span>${b.st[i][1]}</span><small>${b.no} ${b.nm}</small></span></div>`).join('')}</div>`;
     }).join('');
     el.innerHTML = h || '<div class="sr-tdone">いまやることはありません 🎉</div>';
     const badge = document.getElementById(badgeId);
@@ -853,13 +933,19 @@ function initBallsAndTasks() {
         const b = B.find(y => y.no === x.dataset.no);
         const s = b.st[+x.dataset.i];
         s[2] = !s[2];
+        s[3] = s[2] ? Date.now() : null;
         renderAll();
+        if (s[2] && getTaskHideMode() === '10s') {
+          setTimeout(() => { renderAll(); }, 10050);
+        }
         if (b.st.every(z => z[2])) showToast(`${b.no} の作業がぜんぶ終わりました。ボールを渡せます`);
       };
     });
   }
 
   function renderAll() {
+    syncTaskHideSettingsUi();
+    window.__renderTasksAll = renderAll;
     courts.forEach(({ court, blist, softPass }) => {
       ['me', 'law'].forEach(o => {
         const el = court.querySelector('.sr-side.' + o);
