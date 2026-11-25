@@ -4219,6 +4219,19 @@ html, body {
 .c33-bar.done i { background: #5A4E52; }
 .c33-bar.stop i { background: #C2B9BD; }
 .c33-row.end .c33-av { background: #ECEAF2; color: #6F879A; }
+.c33-av.has-img {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(70, 50, 60, 0.12);
+}
+.c33-av.has-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .c33-row.end .c33-nm { color: var(--sr-done); }
 .c33-row.end .c33-no { background: #EEEAEE; color: #6F879A; }
 .c33-menu {

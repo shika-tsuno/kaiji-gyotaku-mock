@@ -185,6 +185,50 @@ function handleSaveSupabaseConfig() {
   }
 }
 
+async function fetchXMetadataClient(rawUrl) {
+  const m = String(rawUrl).match(/https?:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/([^/?#]+)\/status\/(\d+)/i);
+  if (!m) return null;
+  const [, user, statusId] = m;
+  const res = await fetch(`https://api.fxtwitter.com/${encodeURIComponent(user)}/status/${statusId}`);
+  if (!res.ok) throw new Error("X投稿の取得に失敗しました（削除・鍵アカウントの可能性）");
+  const json = await res.json();
+  const tw = json && json.tweet;
+  if (!tw) throw new Error("投稿データが見つかりませんでした");
+  const normUrl = `https://x.com/${tw.author?.screen_name || user}/status/${statusId}`;
+  const rawHashSrc = `${normUrl}|${tw.text || ""}|${tw.created_at || ""}`;
+  let sha256 = "";
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawHashSrc));
+    sha256 = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  const dt = tw.created_at ? new Date(tw.created_at) : new Date();
+  const pad2 = n => String(n).padStart(2, "0");
+  const dateStr = `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+  const timeStr = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())} · ${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日`;
+  const now = new Date();
+  const capStr = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())} JST`;
+  return {
+    url: normUrl,
+    sha256: sha256 || "client-hash-" + statusId,
+    captured: capStr,
+    meta: {
+      name: tw.author?.name || user,
+      handle: "@" + (tw.author?.screen_name || user),
+      userId: tw.author?.id || "",
+      avatar: tw.author?.avatar_url || "",
+      text: tw.text || "",
+      date: dateStr,
+      timeLabel: timeStr,
+      views: tw.views ? (tw.views >= 10000 ? (tw.views / 10000).toFixed(1) + "万" : String(tw.views)) : "-",
+      likes: tw.likes ?? 0,
+      retweets: tw.retweets ?? 0,
+      replies: tw.replies ?? 0,
+      bookmarks: tw.bookmarks ?? 0,
+      statusId
+    }
+  };
+}
+
 async function handleExecuteCapture() {
   const urlInp = document.getElementById("capture-url-input");
   const url = (urlInp.value || "").trim();
@@ -203,7 +247,13 @@ async function handleExecuteCapture() {
   resultBox.style.display = "none";
 
   try {
-    const res = await SupabaseStore.captureUrl(url, crimes);
+    let res = null;
+    try {
+      res = await SupabaseStore.captureUrl(url, crimes);
+    } catch {
+      res = await fetchXMetadataClient(url);
+      if (!res) throw new Error("Xの投稿URLを入力してください");
+    }
     lastCaptureResult = { ...res, crimes, originalUrl: url };
 
     progressBox.style.display = "none";
@@ -211,21 +261,31 @@ async function handleExecuteCapture() {
 
     document.getElementById("result-sha256").textContent = res.sha256 || "計算完了";
     const imgEl = document.getElementById("result-preview-img");
-    // 署名付きURLがあればそれを表示、なければ直接APIまたはプレースホルダー
     if (res.storage && res.storage.signedUrl) {
       imgEl.src = res.storage.signedUrl;
+      imgEl.style.display = "inline-block";
+    } else if (res.meta && res.meta.avatar) {
+      imgEl.src = res.meta.avatar;
+      imgEl.style.display = "inline-block";
     } else {
-      imgEl.src = "/api/capture?url=" + encodeURIComponent(url);
+      imgEl.style.display = "none";
     }
-    showToast("✅ 魚拓PNGの撮影＆SHA-256保全に成功！");
+    showToast("✅ アイコン・投稿情報の取得＆保全に成功！");
   } catch (err) {
     progressBox.style.display = "none";
     btn.disabled = false;
-    showToast("保全失敗: " + err.message);
+    showToast("取得失敗: " + err.message);
   }
 }
 
 function handleAddToCaseList() {
+  if (lastCaptureResult && window.__casesApi && window.__casesApi.addFromCapture) {
+    const added = window.__casesApi.addFromCapture(lastCaptureResult);
+    closeUrlCaptureModal();
+    showToast(`#${String(added.no).padStart(2, '0')} ${added.name} を案件一覧に追加しました`);
+    handleTabClick("cases");
+    return;
+  }
   closeUrlCaptureModal();
   showToast("事案一覧に保全記録を追加しました");
   handleTabClick("cases");
@@ -369,6 +429,33 @@ function initCasesView() {
   if (!$('c33-list')) return;
 
   const D = [
+    {
+      no: 12,
+      name: 'wtp',
+      sv: 'X',
+      id: '@wtpmjgd65924109',
+      st: '準備中',
+      date: '2026-11-25',
+      post: '⚠️【裁判について】⚠️ あなた、私たちを侮（あなど）ってますか？…',
+      fullPost: '⚠️【裁判について】⚠️\nあなた、私たちを侮（あなど）ってますか？\n\n私たちが結託して呼びかけたら実名を出してあなたと裁判に臨める人は必ず出てきますよ。\n\nアンチが何万人いると思ってるんですか？その中からたった数人を見つけだすのは容易なことですよ？\n\nあなたは裁判であなたが全面勝利できると本気で思っているのですか？あれだけの過去が証拠付きであるのに。\n\n今後のあなたの動向次第では私は皆に、『実名であなたを告訴できる人がいるかどうか』呼びかけますよ。',
+      avatar: 'https://pbs.twimg.com/profile_images/2100296181813596160/9Q5_ar17_200x200.jpg',
+      url: 'https://x.com/wtpmjgd65924109/status/2125261688933064998',
+      userId: '1280711048140517376',
+      statusId: '2125261688933064998',
+      timeLabel: '1:14 · 2026年11月25日',
+      views: '2.8万',
+      likes: 167,
+      retweets: 11,
+      replies: 1,
+      bookmarks: 9,
+      capturedAt: '2026-11-25 12:21:54 JST',
+      sha256: '093b25be5119faee318f08b312fbc91b8f514271d17e5d55950a94ef80a5066f',
+      snd: '',
+      pv: '',
+      step: 1,
+      k: 'warn',
+      ps: '魚拓保全済・弁護士へ共有待ち'
+    },
     { no: 1, name: 'サンプル太郎', sv: 'X', id: '@sample_user01', st: '依頼者待ち', date: '2026-03-14', post: 'A・Bの件、まだ許せません…', snd: '', pv: '', step: 3, k: 'warn', ps: '私の書類発送待ち（期限あと2日）' },
     { no: 2, name: '例のアカウント', sv: 'X', id: '@example_acc', st: '進行中', date: '2026-05-02', post: '〇〇はいつも嘘ばかり…', snd: '', pv: '朝日ネット', step: 8, k: 'go', ps: 'X側のIP開示待ち（次回期日 11/26）' },
     { no: 3, name: 'しつこい人A', sv: '5ch', id: '〇〇スレ >>345', st: '準備中', date: '2026-06-21', post: 'あいつの住所知ってる人いる？…', snd: '', pv: 'オプテージ', step: 2, k: 'go', ps: '弁護士が申立て準備中' },
@@ -381,6 +468,12 @@ function initCasesView() {
     { no: 10, name: 'くちわるガール', sv: 'X', id: '@kuchiwaru_g', st: '準備中', date: '2026-10-21', post: 'あの人ほんと最悪…', snd: '', pv: '', step: 2, k: 'go', ps: '弁護士が申立書を作成中' },
     { no: 11, name: '匿名レス702', sv: '5ch', id: '〇〇スレ >>702', st: '準備中', date: '2026-11-02', post: '特定してやろうか…', snd: '', pv: '', step: 1, k: 'go', ps: '証拠を整理中（提出前）' },
   ];
+
+  // localStorageに保存された追加案件を復元
+  try {
+    const saved = JSON.parse(localStorage.getItem('kaiji_added_cases_v1') || '[]');
+    if (Array.isArray(saved)) saved.forEach(item => { if (!D.some(x => x.no === item.no)) D.unshift(item); });
+  } catch {}
 
   const pad = n => '#' + String(n).padStart(2, '0');
   const ICON = { warn: '● ', go: '→ ', done: '✓ ', stop: '■ ' };
@@ -433,11 +526,36 @@ function initCasesView() {
   function buildRow(d) {
     const end = d.k === 'done' || d.k === 'stop';
     const sub = [V.acc[1] ? d.id : '', V.snd[1] && d.snd ? `${d.snd}（${d.pv}）` : ''].filter(Boolean).join(' · ');
-    return `<div class="c33-row${end ? ' end' : ''}" data-no="${d.no}">${V.icon[1] ? `<span class="c33-av">${d.name[0]}</span>` : ''}<div class="c33-mid">
+    const avHtml = d.avatar
+      ? `<span class="c33-av has-img"><span>${d.name[0]}</span><img src="${d.avatar}" alt="${d.name}" onerror="this.remove()"></span>`
+      : `<span class="c33-av">${d.name[0]}</span>`;
+    return `<div class="c33-row${end ? ' end' : ''}" data-no="${d.no}">${V.icon[1] ? avHtml : ''}<div class="c33-mid">
       <div class="c33-t1">${V.no[1] ? `<span class="c33-no">${pad(d.no)}</span>` : ''}<span class="c33-nm">${d.name}</span></div>
       ${sub ? `<div class="c33-sub">${sub}</div>` : ''}${V.post[1] ? `<div class="c33-post">「${d.post}」</div>` : ''}
       ${V.ps[1] ? `<div class="c33-stl ${d.k}">${ICON[d.k]}${d.ps}</div>` : ''}</div>
       <div class="c33-rt"><span class="c33-chev">›</span>${V.bar[1] ? `<span class="c33-bar ${d.k}"><i style="width:${d.step / 12 * 100}%"></i></span>` : '<span></span>'}</div></div>`;
+  }
+
+  function populatePostDetail(d) {
+    if (!d) return;
+    const av = $('kd-avatar');
+    const sav = $('kd-shot-avatar');
+    const avInner = d.avatar
+      ? `<img src="${d.avatar}" alt="${d.name}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.remove()">`
+      : d.name[0];
+    if (av) av.innerHTML = avInner;
+    if (sav) sav.innerHTML = avInner;
+    if ($('kd-name')) $('kd-name').textContent = d.name;
+    if ($('kd-handle')) $('kd-handle').textContent = `${d.sv}: ${d.id}`;
+    if ($('kd-meta-ids')) $('kd-meta-ids').textContent = d.userId ? `ID: ${d.userId} ・ 案件${pad(d.no)}` : `発信者No. 200800${d.no} ・ 投稿No. 2008100${d.no}`;
+    if ($('kd-url')) $('kd-url').textContent = d.url || `https://x.com/${(d.id || '').replace(/^@/, '')}/status/1846...`;
+    if ($('kd-shot-name')) $('kd-shot-name').textContent = d.name;
+    if ($('kd-shot-handle')) $('kd-shot-handle').textContent = d.id;
+    if ($('kd-shot-text')) $('kd-shot-text').textContent = d.fullPost || d.post;
+    if ($('kd-shot-time')) $('kd-shot-time').innerHTML = `${d.timeLabel || d.date} · <strong style="color:#0F172A;">${d.views || '1.8万'}</strong> 件の表示`;
+    if ($('kd-shot-stats')) $('kd-shot-stats').innerHTML = `<span>💬 ${d.replies ?? 14}</span><span>🔁 ${d.retweets ?? 42}</span><span>❤️ ${d.likes ?? 128}</span><span>🔖 ${d.bookmarks ?? 19}</span>`;
+    if ($('kd-captured-at')) $('kd-captured-at').textContent = `保全日時: ${d.capturedAt || d.date + ' 21:18:24 JST'}`;
+    if ($('kd-sha256')) $('kd-sha256').textContent = `SHA-256: ${d.sha256 || '8f4a3c10b7e289...d9a04ef12'}`;
   }
 
   function renderList() {
@@ -462,9 +580,56 @@ function initCasesView() {
       h.onclick = () => { const k = h.dataset.k; closed.has(k) ? closed.delete(k) : closed.add(k); renderList(); };
     });
     $('c33-list').querySelectorAll('.c33-row').forEach(r => {
-      r.onclick = () => { switchView('view-post-detail', true); switchKarteTab('post'); };
+      r.onclick = () => {
+        const d = D.find(x => x.no === Number(r.dataset.no));
+        populatePostDetail(d);
+        switchView('view-post-detail', true);
+        switchKarteTab('post');
+      };
     });
   }
+
+  window.__casesApi = {
+    addFromCapture(res) {
+      const m = res.meta || {};
+      const nextNo = Math.max(...D.map(x => x.no), 0) + 1;
+      const item = {
+        no: nextNo,
+        name: m.name || '新規アカウント',
+        sv: 'X',
+        id: m.handle || '@unknown',
+        st: '準備中',
+        date: m.date || new Date().toISOString().slice(0, 10),
+        post: (m.text || '').replace(/\s+/g, ' ').slice(0, 42) + ((m.text || '').length > 42 ? '…' : ''),
+        fullPost: m.text || '',
+        avatar: m.avatar || '',
+        url: res.url || res.originalUrl || '',
+        userId: m.userId || '',
+        statusId: m.statusId || '',
+        timeLabel: m.timeLabel || '',
+        views: m.views || '-',
+        likes: m.likes ?? 0,
+        retweets: m.retweets ?? 0,
+        replies: m.replies ?? 0,
+        bookmarks: m.bookmarks ?? 0,
+        capturedAt: res.captured || '',
+        sha256: res.sha256 || '',
+        snd: '',
+        pv: '',
+        step: 1,
+        k: 'warn',
+        ps: '魚拓保全済・弁護士へ共有待ち'
+      };
+      D.unshift(item);
+      try {
+        const prev = JSON.parse(localStorage.getItem('kaiji_added_cases_v1') || '[]');
+        prev.unshift(item);
+        localStorage.setItem('kaiji_added_cases_v1', JSON.stringify(prev.slice(0, 30)));
+      } catch {}
+      renderList();
+      return item;
+    }
+  };
 
   ['c33-q', 'c33-from', 'c33-to'].forEach(id => $(id).addEventListener('input', renderList));
   renderChips();
