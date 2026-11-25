@@ -1,22 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
   <defs>
     <radialGradient id="yolk" cx="38%" cy="34%" r="65%">
-      <stop offset="0%" stop-color="#FFE066"/>
+      <stop offset="0%" stop-color="#FFE46B"/>
       <stop offset="55%" stop-color="#FFB300"/>
       <stop offset="100%" stop-color="#F57C00"/>
     </radialGradient>
     <filter id="eggShadow" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#8C4A32" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#5A3A28" flood-opacity="0.22"/>
     </filter>
   </defs>
-  <!-- アプリの世界観に馴染むウォーム背景（角丸） -->
-  <rect width="180" height="180" rx="42" fill="#FFF4EE"/>
-  <!-- ふわっとした目玉焼きの白身 -->
-  <path d="M90 26 C114 24, 134 36, 144 54 C156 76, 158 106, 144 128 C132 148, 108 156, 84 154 C60 152, 38 144, 28 122 C18 100, 24 72, 38 52 C52 34, 68 28, 90 26 Z"
-        fill="#FFFFFF" stroke="#F0E1D8" stroke-width="4" filter="url(#eggShadow)"/>
+  <!-- 背景透過：ふわっと波打つ目玉焼き型の白身のみ -->
+  <path d="M88 12 C116 10, 144 26, 156 52 C170 80, 170 116, 150 142 C132 166, 98 172, 68 166 C38 160, 14 140, 12 108 C10 80, 22 52, 42 32 C56 18, 70 14, 88 12 Z"
+        fill="#FFFFFF" stroke="#E0CFC5" stroke-width="5" filter="url(#eggShadow)"/>
   <!-- ぷっくり黄身 -->
-  <circle cx="92" cy="92" r="34" fill="url(#yolk)"/>
+  <circle cx="94" cy="94" r="40" fill="url(#yolk)"/>
   <!-- 黄身のツヤハイライト -->
-  <ellipse cx="81" cy="79" rx="10" ry="6" transform="rotate(-28 81 79)" fill="#FFFFFF" opacity="0.65"/>
-  <circle cx="74" cy="91" r="3" fill="#FFFFFF" opacity="0.5"/>
+  <ellipse cx="81" cy="79" rx="12" ry="7" transform="rotate(-28 81 79)" fill="#FFFFFF" opacity="0.72"/>
+  <circle cx="72" cy="93" r="3.5" fill="#FFFFFF" opacity="0.55"/>
 </svg>
