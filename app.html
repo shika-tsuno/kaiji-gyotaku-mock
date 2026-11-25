@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125g">
+<link rel="stylesheet" href="css/app.css?v=20261125h">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -315,43 +315,43 @@
       </div>
     </div>
 
-    <!-- 1-B. 投稿詳細ビュー（カルテ風5タブ統合：投稿・アカウント・発信者・書類・チャット） -->
+    <!-- 1-B. 投稿詳細ビュー（白ヘッダー＋下線タブバー固定：投稿・アカウント・発信者・書類・チャット） -->
     <div id="view-post-detail" class="view-page">
-      <div class="subpage-nav-bar">
-        <button type="button" class="back-btn" onclick="goBackView()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          <span>案件一覧</span>
-        </button>
-        <span class="subpage-title" id="detail-nav-title">投稿詳細</span>
-        <button type="button" class="nav-action-btn" onclick="showToast('共有リンクを生成しました')">共有</button>
+      <div class="detail-sticky-header">
+        <div class="subpage-nav-bar">
+          <button type="button" class="back-btn" onclick="goBackView()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>案件一覧</span>
+          </button>
+          <span class="subpage-title" id="detail-nav-title">投稿詳細</span>
+          <button type="button" class="nav-action-btn" onclick="showToast('共有リンクを生成しました')">共有</button>
+        </div>
+        <div class="karte-tabs">
+          <div class="karte-tab active" data-ktab="post" onclick="switchKarteTab('post')">投稿</div>
+          <div class="karte-tab" data-ktab="account" onclick="switchKarteTab('account')">アカウント</div>
+          <div class="karte-tab" data-ktab="sender" onclick="switchKarteTab('sender')">発信者</div>
+          <div class="karte-tab" data-ktab="docs" onclick="switchKarteTab('docs')">書類</div>
+          <div class="karte-tab" data-ktab="chat" onclick="switchKarteTab('chat')">チャット<span class="karte-badge">2</span></div>
+        </div>
       </div>
       <div class="screen">
       <!-- スクロール本文エリア -->
-      <div class="scroll-content" style="padding: 12px 14px 80px; display:flex; flex-direction:column; gap:18px;">
+      <div class="scroll-content" style="padding: 14px 14px 80px; display:flex; flex-direction:column; gap:16px;">
 
-        <!-- 3. カルテ風フォルダ見出しタブ（[投稿] [アカウント] [発信者] [書類] [チャット 2]）＋ 名前カード -->
-        <div class="karte-wrap">
-          <div class="karte-tabs">
-            <div class="karte-tab active" data-ktab="post" onclick="switchKarteTab('post')">投稿</div>
-            <div class="karte-tab" data-ktab="account" onclick="switchKarteTab('account')">アカウント</div>
-            <div class="karte-tab" data-ktab="sender" onclick="switchKarteTab('sender')">発信者</div>
-            <div class="karte-tab" data-ktab="docs" onclick="switchKarteTab('docs')">書類</div>
-            <div class="karte-tab" data-ktab="chat" onclick="switchKarteTab('chat')">チャット<span class="karte-badge">2</span></div>
+        <!-- 3. 対象アカウント・投稿ヘッダーカード -->
+        <div class="karte-sheet" style="display:flex; align-items:center; gap:12px;">
+          <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
+            ダ
           </div>
-          <div class="karte-sheet" style="display:flex; align-items:center; gap:12px;">
-            <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
-              ダ
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:16px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:6px;">
+              ダミー次郎
             </div>
-            <div style="flex:1; min-width:0;">
-              <div style="font-size:16px; font-weight:800; color:var(--sys-label-primary); display:flex; align-items:center; gap:6px;">
-                ダミー次郎
-              </div>
-              <div style="font-size:12px; color:var(--sys-label-secondary); margin-top:2px;">
-                X: @dummy_jiro
-              </div>
-              <div style="font-size:11px; color:var(--sys-label-tertiary); margin-top:2px;">
-                発信者No. 2008001 ・ 投稿No. 20081001
-              </div>
+            <div style="font-size:12px; color:var(--sys-label-secondary); margin-top:2px;">
+              X: @dummy_jiro
+            </div>
+            <div style="font-size:11px; color:var(--sys-label-tertiary); margin-top:2px;">
+              発信者No. 2008001 ・ 投稿No. 20081001
             </div>
           </div>
         </div>

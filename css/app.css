@@ -5099,68 +5099,71 @@ html, body {
 }
 
 /* =========================================================================
-   案件詳細：カルテ（紙フォルダ見出し）風タブ ＆ 本体シート
+   案件詳細：フルワイド白ヘッダー＋下線インジケータータブ（ジャンプNAVI形式）
    ========================================================================= */
-.karte-wrap {
-  display: flex;
-  flex-direction: column;
+.detail-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(70, 50, 60, 0.12);
+}
+.detail-sticky-header .subpage-nav-bar {
+  position: relative;
+  background: #FFFFFF;
+  border-bottom: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding-bottom: 4px;
 }
 .karte-tabs {
   display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  padding: 0 6px;
-  position: relative;
-  z-index: 2;
+  align-items: stretch;
+  width: 100%;
+  background: #FFFFFF;
+  padding: 0 4px;
 }
 .karte-tab {
   flex: 1;
   min-width: 0;
   text-align: center;
-  padding: 8px 3px 7px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #6F6478;
-  background: #EAE4E1;
-  border: 1px solid rgba(70, 50, 60, 0.14);
-  border-bottom: none;
-  border-radius: 11px 11px 0 0;
+  padding: 10px 2px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8C8296;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
   white-space: nowrap;
-  transition: background .15s, color .15s;
+  position: relative;
+  margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
 }
 .karte-tab.active {
-  background: #FFFFFF;
   color: #C2432A;
   font-weight: 800;
-  padding-top: 9px;
-  padding-bottom: 8px;
-  margin-bottom: -1px;
-  border-color: rgba(70, 50, 60, 0.16);
-  box-shadow: inset 0 2.5px 0 #C2432A, 0 -2px 6px rgba(59, 48, 84, 0.04);
-  z-index: 3;
+  border-bottom-color: #C2432A;
 }
 .karte-tab .karte-badge {
   background: #C2432A;
   color: #FFFFFF;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   padding: 1px 5px;
-  border-radius: 8px;
+  border-radius: 999px;
   line-height: 1.2;
 }
 .karte-sheet {
   background: #FFFFFF;
-  border: 1px solid rgba(70, 50, 60, 0.16);
-  border-radius: 0 14px 16px 16px;
+  border: 1px solid rgba(70, 50, 60, 0.10);
+  border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 3px 12px rgba(59, 48, 84, 0.05);
-  position: relative;
-  z-index: 1;
+  box-shadow: 0 2px 8px rgba(59, 48, 84, 0.04);
 }
 .karte-panel {
   display: none;
