@@ -85,9 +85,9 @@ const SupabaseStore = {
       if (emailEl) emailEl.textContent = this.currentUser.email || "ユーザー";
     } else {
       const isConfigured = !!this.client;
-      if (iconEl) iconEl.textContent = isConfigured ? "☁️" : "⚠️";
-      if (textEl) textEl.textContent = isConfigured ? "クラウド連携" : "未設定";
-      if (statusBtn) statusBtn.style.color = "#2563EB";
+      if (iconEl) iconEl.textContent = isConfigured ? "☁️" : "⚙️";
+      if (textEl) textEl.textContent = isConfigured ? "クラウド連携設定を開く" : "クラウド連携を設定する";
+      if (statusBtn) statusBtn.style.color = "#FFFFFF";
       if (loggedInBox) loggedInBox.style.display = "none";
       if (loginBox) loginBox.style.display = "block";
     }
@@ -1273,7 +1273,7 @@ function updateGsStatusBadge(cfg) {
     badge.style.background = '#DCFCE7';
     badge.style.color = '#15803D';
   } else {
-    badge.textContent = 'フォーマット構築可';
+    badge.textContent = '全6シート';
   }
 }
 
