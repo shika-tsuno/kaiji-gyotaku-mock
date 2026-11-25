@@ -317,17 +317,15 @@
       </div>
     </div>
 
-    <!-- 1-B. 投稿詳細ビュー（新枠組み ＆ 進捗追加ボタン新設版） -->
+    <!-- 1-B. 投稿詳細ビュー（カルテ風5タブ統合：投稿・アカウント・発信者・書類・チャット） -->
     <div id="view-post-detail" class="view-page">
       <div class="subpage-nav-bar">
-        <button class="back-btn" onclick="goBackView()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          案件一覧
+        <button type="button" class="back-btn" onclick="goBackView()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>案件一覧</span>
         </button>
-        <span class="subpage-title">投稿詳細</span>
-        <div style="width:60px; text-align:right;">
-          <button style="background:none; border:none; font-size:13px; font-weight:600; color:#FF5A5F; cursor:pointer;" onclick="showToast('共有リンクを生成しました')">共有</button>
-        </div>
+        <span class="subpage-title" id="detail-nav-title">投稿詳細</span>
+        <button type="button" class="nav-action-btn" onclick="showToast('共有リンクを生成しました')">共有</button>
       </div>
       <div class="screen">
       <!-- スクロール本文エリア -->
@@ -336,11 +334,11 @@
         <!-- 3. カルテ風フォルダ見出しタブ（[投稿] [アカウント] [発信者] [書類] [チャット 2]）＋ 名前カード -->
         <div class="karte-wrap">
           <div class="karte-tabs">
-            <div class="karte-tab active" data-ktab="post">投稿</div>
-            <div class="karte-tab" data-ktab="account">アカウント</div>
-            <div class="karte-tab" data-ktab="sender">発信者</div>
-            <div class="karte-tab" data-ktab="docs">書類</div>
-            <div class="karte-tab" data-ktab="chat">チャット<span class="karte-badge">2</span></div>
+            <div class="karte-tab active" data-ktab="post" onclick="switchKarteTab('post')">投稿</div>
+            <div class="karte-tab" data-ktab="account" onclick="switchKarteTab('account')">アカウント</div>
+            <div class="karte-tab" data-ktab="sender" onclick="switchKarteTab('sender')">発信者</div>
+            <div class="karte-tab" data-ktab="docs" onclick="switchKarteTab('docs')">書類</div>
+            <div class="karte-tab" data-ktab="chat" onclick="switchKarteTab('chat')">チャット<span class="karte-badge">2</span></div>
           </div>
           <div class="karte-sheet" style="display:flex; align-items:center; gap:12px;">
             <div style="width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); color:#FFFFFF; font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 3px 10px rgba(124,58,237,0.3);">
@@ -359,6 +357,9 @@
             </div>
           </div>
         </div>
+
+        <!-- ===== パネル1：投稿タブ ===== -->
+        <div id="kpanel-post" class="karte-panel active">
 
         <!-- 5. 取得魚拓プレビュー（証拠原本・C案仕様） -->
         <div class="shot" style="border-radius:14px; overflow:hidden; border:1px solid rgba(155,143,178,0.22); background:#FFFFFF; box-shadow:0 4px 16px rgba(59,48,84,0.06);">
@@ -690,18 +691,220 @@
             </p>
           </div>
         </div>
+        </div><!-- /#kpanel-post -->
+
+        <!-- ===== パネル2：アカウントタブ ===== -->
+        <div id="kpanel-account" class="karte-panel">
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">アカウント基本情報</div>
+              <button type="button" class="k-sec-link" onclick="showToast('アカウント情報を編集します')">編集</button>
+            </div>
+            <div class="k-card">
+              <div class="k-row"><span class="k-lbl">媒体</span><span class="k-val">𝕏 (Twitter)</span></div>
+              <div class="k-row"><span class="k-lbl">表示名</span><span class="k-val">ダミー次郎</span></div>
+              <div class="k-row"><span class="k-lbl">アカウントID</span><span class="k-val" style="font-family:monospace;">@dummy_jiro</span></div>
+              <div class="k-row"><span class="k-lbl">プロフィールURL</span><span class="k-val" style="color:#C2432A; font-family:monospace;">x.com/dummy_jiro</span></div>
+              <div class="k-row"><span class="k-lbl">アカウント状態</span><span class="k-pill warn">鍵なし・稼働中</span></div>
+              <div class="k-row"><span class="k-lbl">登録投稿数</span><span class="k-val">2件（開示対象1件 / 予備1件）</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">このアカウントの投稿一覧</div>
+              <button type="button" class="k-sec-link" onclick="openUrlCaptureModal()">＋ 投稿を追加</button>
+            </div>
+            <div class="k-card">
+              <div class="k-row" style="cursor:pointer;" onclick="switchKarteTab('post')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">#04 「〇〇の経歴は全部嘘で犯罪歴もある…」</div>
+                  <div style="font-size:11px; color:var(--sys-label-secondary); margin-top:2px;">2026/08/10 21:18 · X側のIP開示待ち</div>
+                </div>
+                <span class="k-pill warn">表示中</span>
+              </div>
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('別投稿 #04-2 を表示します')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">#04-2 「店行くだけでもリスク。みんな気をつけて」</div>
+                  <div style="font-size:11px; color:var(--sys-label-secondary); margin-top:2px;">2026/08/12 19:05 · 魚拓保全済み（予備証拠）</div>
+                </div>
+                <span class="k-pill ok">保全済</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">紐付く発信者（同一人物）</div>
+              <button type="button" class="k-sec-link" onclick="switchKarteTab('sender')">発信者を見る ›</button>
+            </div>
+            <div class="k-card">
+              <div class="k-row" style="cursor:pointer;" onclick="switchKarteTab('sender')">
+                <div>
+                  <div style="font-size:13px; font-weight:800; color:var(--sys-label-primary);">山田 太郎（ヤマダ タロウ）</div>
+                  <div style="font-size:11px; color:var(--sys-label-secondary); margin-top:2px;">#05（5ch 匿名レス88）と同一人物と判明</div>
+                </div>
+                <span class="k-pill ok">特定済</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== パネル3：発信者タブ（スプシ構造化列と完全一致） ===== -->
+        <div id="kpanel-sender" class="karte-panel">
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">発信者 特定情報（氏名・住所・連絡先）</div>
+              <button type="button" class="k-sec-link" onclick="showToast('発信者情報を編集します')">編集</button>
+            </div>
+            <div class="k-card">
+              <div class="k-row"><span class="k-lbl">発信者No.</span><span class="k-val" style="font-family:monospace;">2008001</span></div>
+              <div class="k-row"><span class="k-lbl">発信者氏名</span><span class="k-val">山田 太郎</span></div>
+              <div class="k-row"><span class="k-lbl">フリガナ</span><span class="k-val">ヤマダ タロウ</span></div>
+              <div class="k-row"><span class="k-lbl">郵便番号</span><span class="k-val" style="font-family:monospace;">〒160-0022</span></div>
+              <div class="k-row"><span class="k-lbl">発信者住所</span><span class="k-val">東京都新宿区新宿1-2-3<br>〇〇マンション 302号室</span></div>
+              <div class="k-row"><span class="k-lbl">電話番号（キャリア）</span><span class="k-val" style="font-family:monospace;">090-1234-5678（ドコモ）</span></div>
+              <div class="k-row"><span class="k-lbl">メールアドレス</span><span class="k-val" style="font-family:monospace;">yamada.taro@example.com</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">通信ログ・プロバイダ情報</div>
+            </div>
+            <div class="k-card">
+              <div class="k-row"><span class="k-lbl">接続元IPアドレス</span><span class="k-val" style="font-family:monospace;">126.152.88.14</span></div>
+              <div class="k-row"><span class="k-lbl">接続元ポート番号</span><span class="k-val" style="font-family:monospace;">51200</span></div>
+              <div class="k-row"><span class="k-lbl">プロバイダ</span><span class="k-val">ＮＴＴドコモ</span></div>
+              <div class="k-row"><span class="k-lbl">下位プロバイダ</span><span class="k-val">なし</span></div>
+              <div class="k-row"><span class="k-lbl">損害賠償請求日</span><span class="k-val">2026/09/10</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">合算示談・回収状況</div>
+            </div>
+            <div class="k-card">
+              <div class="k-row"><span class="k-lbl">合算対象案件</span><span class="k-val">#04（X @dummy_jiro）＋ #05（5ch >>88）</span></div>
+              <div class="k-row"><span class="k-lbl">合意示談金額</span><span class="k-val" style="color:#C2432A; font-size:14px;">300,000円</span></div>
+              <div class="k-row"><span class="k-lbl">振込期日</span><span class="k-val">2026/11/30</span></div>
+              <div class="k-row"><span class="k-lbl">回収ステータス</span><span class="k-pill warn">示談了承→振込待ち</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== パネル4：書類・証拠タブ ===== -->
+        <div id="kpanel-docs" class="karte-panel">
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="openQuickModal()" style="flex:1; background:linear-gradient(135deg,#C2432A,#A3321B); color:#fff; border:none; border-radius:12px; padding:10px 12px; font-size:12.5px; font-weight:800; cursor:pointer;">＋ 書類・証拠を追加</button>
+            <button type="button" onclick="openLinkedGoogleUrl('drive')" style="flex:1; background:#FFFFFF; color:#065F46; border:1.5px solid #10B981; border-radius:12px; padding:10px 12px; font-size:12.5px; font-weight:800; cursor:pointer;">📁 Drive保管庫を開く ↗</button>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">裁判所・プロバイダ関連書類</div>
+              <span style="font-size:11px; color:var(--sys-label-secondary); font-weight:600;">4件</span>
+            </div>
+            <div class="k-card">
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('発信者情報開示命令申立書（PDF）をプレビューします')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">📄 発信者情報開示命令申立書</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:2px;">PDF・324KB · 2026/10/20 提出</div>
+                </div>
+                <span class="k-pill ok">提出済</span>
+              </div>
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('侵害情報通知書（PDF）をプレビューします')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">📄 侵害情報通知書兼送信防止措置依頼書</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:2px;">PDF・188KB · 2026/10/20 提出</div>
+                </div>
+                <span class="k-pill ok">提出済</span>
+              </div>
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('仮処分決定書（PDF）をプレビューします')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">📄 決定書_東京地裁_民事9部.pdf</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:2px;">PDF・512KB · 2026/10/26 受領</div>
+                </div>
+                <span class="k-pill info">受領済</span>
+              </div>
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('陳述書ひな形を開きます')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">📝 陳述書（被害経緯・精神的苦痛）</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:2px;">PDF・ひな形 · 依頼者署名待ち</div>
+                </div>
+                <span class="k-pill warn">作成予定</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="k-sec-head">
+              <div class="k-sec-title">保全済み魚拓・スクリーンショット</div>
+              <button type="button" class="k-sec-link" onclick="openUrlCaptureModal()">＋ URL保全</button>
+            </div>
+            <div class="k-card">
+              <div class="k-row" style="cursor:pointer;" onclick="showToast('魚拓原本PNG（帯付き）を表示します')">
+                <div>
+                  <div style="font-size:12.5px; font-weight:800; color:var(--sys-label-primary);">🖼️ 証拠_20081001.png（帯付き魚拓）</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary); margin-top:2px;">PNG・1.2MB · 2026-08-10 21:18:24 JST</div>
+                  <div style="font-size:9.5px; color:#64748B; font-family:monospace; margin-top:2px;">SHA-256: 8f4a3c10b7e289...d9a04ef12</div>
+                </div>
+                <span class="k-pill ok">保全済</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== パネル5：チャットタブ（弁護士とのメッセージ全履歴＆送信） ===== -->
+        <div id="kpanel-chat" class="karte-panel">
+          <div class="k-card" style="padding:14px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--sys-separator);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:30px; height:30px; border-radius:50%; background:#475569; color:#fff; font-size:12px; font-weight:800; display:grid; place-items:center;">神</div>
+                <div>
+                  <div style="font-size:13px; font-weight:800; color:var(--sys-label-primary);">神田 敬一 弁護士</div>
+                  <div style="font-size:10.5px; color:var(--sys-label-secondary);">神田法律事務所 · #04 ダミー次郎</div>
+                </div>
+              </div>
+              <span class="k-pill info">担当弁護士</span>
+            </div>
+
+            <div id="karte-chat-messages" style="display:flex; flex-direction:column; gap:10px;">
+              <div style="text-align:center; font-size:10.5px; color:#94A3B8;">2026年10月20日</div>
+              <div style="display:flex; gap:8px; align-items:flex-start;">
+                <div style="width:26px; height:26px; border-radius:50%; background:#475569; color:#fff; font-size:11px; font-weight:800; display:grid; place-items:center; flex:none;">神</div>
+                <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
+                  東京地裁へ発信者情報開示命令および仮処分の申立てを完了しました。進捗タイムラインを更新しております。
+                  <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">14:10</div>
+                </div>
+              </div>
+
+              <div style="text-align:center; font-size:10.5px; color:#94A3B8;">2026年10月26日</div>
+              <div style="display:flex; gap:8px; align-items:flex-start;">
+                <div style="width:26px; height:26px; border-radius:50%; background:#475569; color:#fff; font-size:11px; font-weight:800; display:grid; place-items:center; flex:none;">神</div>
+                <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
+                  東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。次回口頭弁論は11/12（木）13:30です。
+                  <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">17:15</div>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end;">
+                <div style="background:linear-gradient(135deg, #FF8A65 0%, #FF6E6E 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(255,110,110,0.25);">
+                  ご連絡ありがとうございます！仮処分決定で安心しました。引き続きよろしくお願いいたします。
+                  <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">既読 17:18</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px; margin-top:4px; padding-top:10px; border-top:1px solid var(--sys-separator);">
+              <input type="text" id="karte-chat-input" placeholder="弁護士へメッセージを入力..." style="flex:1; border:1px solid rgba(155,143,178,0.3); border-radius:20px; padding:8px 14px; font-size:12.5px; outline:none; background:#FAF9F7;" onkeydown="if(event.key==='Enter')sendKarteChat()">
+              <button type="button" onclick="sendKarteChat()" style="background:#C2432A; color:#FFFFFF; border:none; border-radius:20px; padding:8px 16px; font-size:12.5px; font-weight:800; cursor:pointer;">送信</button>
+            </div>
+          </div>
+        </div>
 
       </div>
-
-      <!-- 13. 最下部固定タブバー（中央はみ出し丸型FAB付き） -->
-      <div class="tabbar">
-        <div class="tab on"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
-        <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
-        <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
-        <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
-        <div class="tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
-      </div>
-      <div class="home-indicator"></div>
     </div>
     </div>
 

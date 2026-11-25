@@ -299,7 +299,50 @@ function handleTabClick(tabName) {
 }
 
 function openChatFromBubble() {
-  switchView('view-chat-thread', true);
+  switchView('view-post-detail', true);
+  switchKarteTab('chat');
+}
+
+const KARTE_TITLES = {
+  post: '投稿詳細',
+  account: 'アカウント詳細',
+  sender: '発信者情報',
+  docs: '書類・証拠',
+  chat: 'チャット'
+};
+
+function switchKarteTab(tabKey) {
+  const valid = KARTE_TITLES[tabKey] ? tabKey : 'post';
+  document.querySelectorAll('#view-post-detail .karte-tab').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-ktab') === valid);
+  });
+  document.querySelectorAll('#view-post-detail .karte-panel').forEach(el => {
+    el.classList.toggle('active', el.id === 'kpanel-' + valid);
+  });
+  const titleEl = document.getElementById('detail-nav-title');
+  if (titleEl) titleEl.textContent = KARTE_TITLES[valid];
+  const detailView = document.getElementById('view-post-detail');
+  if (detailView) detailView.scrollTop = 0;
+}
+
+function sendKarteChat() {
+  const input = document.getElementById('karte-chat-input');
+  const box = document.getElementById('karte-chat-messages');
+  if (!input || !box) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex; justify-content:flex-end;';
+  div.innerHTML = `<div style="background:linear-gradient(135deg, #FF8A65 0%, #FF6E6E 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(255,110,110,0.25);">
+    ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+    <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">送信済 ${hh}:${mm}</div>
+  </div>`;
+  box.appendChild(div);
+  input.value = '';
+  showToast('弁護士へメッセージを送信しました');
 }
 
 function openQuickModal() {
@@ -424,7 +467,7 @@ function initCasesView() {
       h.onclick = () => { const k = h.dataset.k; closed.has(k) ? closed.delete(k) : closed.add(k); renderList(); };
     });
     $('c33-list').querySelectorAll('.c33-row').forEach(r => {
-      r.onclick = () => { switchView('view-post-detail', true); };
+      r.onclick = () => { switchView('view-post-detail', true); switchKarteTab('post'); };
     });
   }
 
@@ -1319,23 +1362,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // カルテ風タブ切り替え
-  document.querySelectorAll('#view-post-detail .karte-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const text = tab.textContent.trim();
-      if (text.includes('書類')) {
-        showToast('書類タブへ切り替えました');
-      } else if (text.includes('チャット')) {
-        switchView('view-chat-thread');
-      } else if (text.includes('アカウント')) {
-        switchView('view-account-detail');
-      } else if (text.includes('発信者')) {
-        switchView('view-sender-detail');
-      } else {
-        showToast('投稿タブを表示中');
-      }
-    });
-  });
+  // カルテ風タブ切り替え（onclick="switchKarteTab(...)" で直接処理するため重複リスナーなし）
 
   // クイックハブの2x2ボタン
   document.querySelectorAll('#quick-modal .quick-hub-tile, #quick-modal .card, #quick-modal button, #quick-modal div[style*="cursor"]').forEach(btn => {
