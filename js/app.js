@@ -396,16 +396,18 @@ function initCasesView() {
   const gkey = d => G === 'sv' ? SVN[d.sv] : G === 'st' ? d.st : G === 'pv' ? (d.pv || 'プロバイダ未判明') : G === 'date' ? d.date.slice(0, 7).replace('-', '年') + '月' : (d.snd && d.snd !== '特定できず' ? d.snd : d.snd || '未特定');
 
   function renderChips() {
-    $('c33-chips').innerHTML = GROUPS.map(([k, l]) => `<span class="c33-chip${k === G ? ' on' : ''}" data-k="${k}">${l}</span>`).join('') + '<span class="c33-per" id="c33-per">期間指定<small>▼</small></span>';
-    $('c33-chips').querySelectorAll('.c33-chip').forEach(c => {
+    $('c33-chips').innerHTML = GROUPS.map(([k, l]) => `<button type="button" class="c33-tab${k === G ? ' on' : ''}" data-k="${k}">${l}</button>`).join('');
+    $('c33-chips').querySelectorAll('.c33-tab').forEach(c => {
       c.onclick = () => { G = c.dataset.k; closed.clear(); renderChips(); renderList(); };
     });
-    $('c33-per').onclick = () => {
-      const p = $('c33-prow');
-      p.classList.toggle('on');
-      if (!p.classList.contains('on')) { $('c33-from').value = ''; $('c33-to').value = ''; renderList(); }
-    };
   }
+
+  $('c33-per').onclick = () => {
+    const p = $('c33-prow');
+    const isOn = p.classList.toggle('on');
+    $('c33-per').classList.toggle('on', isOn);
+    if (!isOn) { $('c33-from').value = ''; $('c33-to').value = ''; renderList(); }
+  };
 
   function renderMenus() {
     $('c33-vm').innerHTML = '<h6>一覧に出す情報</h6>' + Object.entries(V).map(([k, [l, c]]) => `<div data-k="${k}"><i>${c ? '✓' : ''}</i>${l}</div>`).join('');
@@ -418,8 +420,6 @@ function initCasesView() {
         e.stopPropagation();
         if (x.dataset.d) asc = x.dataset.d === '1';
         else S = x.dataset.k;
-        $('c33-sl').textContent = SORTS.find(s => s[0] === S)[1];
-        $('c33-sd').textContent = asc ? '↑' : '↓';
         renderMenus();
         renderList();
       };

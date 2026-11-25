@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125i">
+<link rel="stylesheet" href="css/app.css?v=20261125j">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -31,24 +31,40 @@
   <!-- メイン画面スタック -->
   <div class="main-view-stack">
 
-    <!-- 1. 案件一覧ビュー（第33版 完全移植） -->
+    <!-- 1. 案件一覧ビュー（白一体型ヘッダー＋下線タブバー＋アイコンボタン） -->
     <div id="view-cases" class="view-page sr-view">
-      <div class="main-page-header"><h1>案件一覧</h1></div>
-      <div class="sr-body">
-        <div class="c33-top">
-          <div class="c33-pills">
-            <button type="button" class="c33-pill" id="c33-vb">表示情報<small>▼</small></button>
-            <button type="button" class="c33-pill" id="c33-sb">並替: <span id="c33-sl">No.</span> <span id="c33-sd">↑</span></button>
-            <div class="c33-menu" id="c33-vm"></div>
-            <div class="c33-menu" id="c33-sm"></div>
+      <div class="detail-sticky-header">
+        <div class="subpage-nav-bar">
+          <!-- 左：期間指定（カレンダーアイコン） -->
+          <div class="hdr-icon-group">
+            <button type="button" class="hdr-icon-btn" id="c33-per" title="期間指定" aria-label="期間指定">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <!-- 中央：タイトル -->
+          <span class="subpage-title">案件一覧</span>
+          <!-- 右：表示情報（スライダーアイコン） ＆ 並べ替え（上下矢印アイコン） -->
+          <div class="hdr-icon-group">
+            <button type="button" class="hdr-icon-btn" id="c33-vb" title="表示情報" aria-label="表示情報">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="#FFFFFF"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="#FFFFFF"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="10" cy="18" r="2" fill="#FFFFFF"/></svg>
+            </button>
+            <button type="button" class="hdr-icon-btn" id="c33-sb" title="並べ替え" aria-label="並べ替え">
+              <svg viewBox="0 0 24 24"><path d="M7 15l-3 3-3-3"/><path d="M4 18V6"/><path d="M17 9l3-3 3 3"/><path d="M20 6v12"/></svg>
+            </button>
+            <div class="c33-menu" id="c33-vm" style="top:38px; right:36px;"></div>
+            <div class="c33-menu" id="c33-sm" style="top:38px; right:0;"></div>
           </div>
         </div>
+        <!-- 2段目：媒体別 / 進捗別 / プロバイダ別 / 月別 / 発信者別 下線タブバー -->
+        <div class="c33-tabs-bar" id="c33-chips"></div>
+      </div>
+
+      <div class="sr-body">
+        <div class="c33-prow" id="c33-prow" style="padding-bottom:10px;">期間<input type="date" id="c33-from"><span>〜</span><input type="date" id="c33-to"></div>
         <div class="c33-search">
           <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="#6F879A" stroke-width="1.7"><circle cx="7" cy="7" r="5.2"/><path d="M11 11l4 4"/></svg>
           <input id="c33-q" placeholder="名前・ID・No.で検索">
         </div>
-        <div class="c33-chips" id="c33-chips"></div>
-        <div class="c33-prow" id="c33-prow">期間<input type="date" id="c33-from"><span>〜</span><input type="date" id="c33-to"></div>
         <div id="c33-list"></div>
       </div>
     </div>
@@ -1870,7 +1886,7 @@
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125g"></script>
+<script src="js/app.js?v=20261125j"></script>
 
 </body>
 </html>
