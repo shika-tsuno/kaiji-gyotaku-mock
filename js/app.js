@@ -1184,6 +1184,11 @@ function downloadAllSheetsCsv() {
   showToast('📦 全5シートのCSVを一括ダウンロードしました');
 }
 
+function toggleMoreAcc(btn) {
+  const item = btn && btn.closest('.more-acc');
+  if (item) item.classList.toggle('open');
+}
+
 function toggleGasGuide() {
   const el = document.getElementById('gs-gas-guide');
   if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';

@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125e">
+<link rel="stylesheet" href="css/app.css?v=20261125g">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -1180,236 +1180,223 @@
       </div>
     </div>
 
-    <!-- 4. 設定 & 全体手続Q&Aビュー (画面⑭ SVGフローチャート ＆ アコーディオン) -->
-    <div id="view-qa" class="view-page">
-      <div class="screen">
-      
-
-      <div class="navbar" style="background:transparent; border-bottom:1px solid rgba(0,0,0,0.05); padding-top:8px;">
-        <div class="nav-row" style="justify-content:space-between; padding:10px 16px;">
-          <span style="font-size:20px; font-weight:800; color:#1D192B;">その他・Q&A</span>
-          <button id="btn-cloud-status" class="nav-btn" onclick="openAuthModal()" style="border:none; background:rgba(59,130,246,0.12); color:#2563EB; font-weight:700; border-radius:14px; padding:4px 10px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-            <span id="cloud-status-icon">☁️</span> <span id="cloud-status-text">クラウド連携</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="content" style="padding:14px 12px 18px; overflow:visible;">
-        <!-- アカウント情報 -->
-        <div style="display:flex; gap:10px; align-items:center; background:#fff; border:1px solid rgba(155, 143, 178, 0.2); border-radius:12px; padding:10px 12px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
-          <div style="width:34px; height:34px; border-radius:50%; background:var(--accent-coral-grad); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; flex:none;">被</div>
+    <!-- 5. その他ビュー（1行アコーディオンで下にギュンと開く設計・フッター2重解消） -->
+    <div id="view-qa" class="view-page sr-view">
+      <div class="sr-body" style="padding: 8px 16px 32px;">
+        <div class="sr-top" style="padding: 4px 0 12px;">
           <div>
-            <div style="font-size:12px; font-weight:800; color:#2f2a4a;">被害者・依頼者アカウント</div>
-            <div style="font-size:9.5px; color:#7a7690; margin-top:1px;">Google認証連携済・担当: 神田法律事務所</div>
+            <h1>その他</h1>
+            <small>設定・スプレッドシート連携・手続Q&A</small>
           </div>
         </div>
 
-        <!-- Googleスプレッドシート ＆ Googleドライブ連携・初期構築セクション -->
-        <div class="gs-card" id="gs-integration-card">
-          <div class="gs-head">
-            <div class="gs-title">
-              <span>📊 スプレッドシート ＆ ドライブ連携</span>
-            </div>
-            <span class="gs-status-badge" id="gs-conn-badge">フォーマット構築可</span>
-          </div>
-          <div class="gs-desc">
-            弁護士管理用の投稿記事目録（掲示板・X）・費用管理シートと、アプリの案件詳細・証拠魚拓（Googleドライブ保管）・タスクを双方向連携します。
-          </div>
+        <div class="more-acc-list">
 
-          <!-- 連携先URL / ID 設定フォーム -->
-          <div class="gs-input-group">
-            <div class="gs-field">
-              <label>
-                <span>📗 Googleスプレッドシート URL / ID</span>
-                <a onclick="openLinkedGoogleUrl('sheet')">シートを開く ↗</a>
-              </label>
-              <input type="url" id="gs-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." oninput="saveGsConfig()">
-            </div>
-            <div class="gs-field">
-              <label>
-                <span>📁 Googleドライブ 証拠・書類保管フォルダ URL / ID</span>
-                <a onclick="openLinkedGoogleUrl('drive')">ドライブを開く ↗</a>
-              </label>
-              <input type="url" id="gs-drive-url" placeholder="https://drive.google.com/drive/folders/..." oninput="saveGsConfig()">
-            </div>
-            <div class="gs-field">
-              <label>
-                <span>⚙️ GAS Webアプリ同期URL（Apps Script）</span>
-                <a onclick="toggleGasGuide()">初期構築の手順 ▾</a>
-              </label>
-              <input type="url" id="gs-gas-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveGsConfig()">
-            </div>
-            <div class="gs-btn-row" style="margin-top:2px;">
-              <button type="button" class="gs-btn primary" onclick="syncWithGoogleSheets()">
-                🔄 スプレッドシートと同期
+          <!-- 1. アカウント設定 -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">👤</span>
+              <span class="more-acc-title">アカウント設定・クラウド連携</span>
+              <span class="more-acc-tag green">連携可</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad">
+              <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+                <div style="width:38px; height:38px; border-radius:50%; background:var(--accent-coral-grad); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; flex:none;">被</div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:13px; font-weight:800; color:#1D192B;">被害者・依頼者アカウント</div>
+                  <div style="font-size:11px; color:#6F6478; margin-top:2px;">Google認証連携済 · 担当: 神田法律事務所</div>
+                </div>
+              </div>
+              <div class="k-card" style="margin-bottom:10px;">
+                <div class="k-row"><span class="k-lbl">依頼者区分</span><span class="k-val">個人（秘匿事項届出 希望）</span></div>
+                <div class="k-row"><span class="k-lbl">担当法律事務所</span><span class="k-val">神田法律事務所（神田 敬一 弁護士）</span></div>
+                <div class="k-row"><span class="k-lbl">通知設定</span><span class="k-pill ok">期日・新着チャットON</span></div>
+              </div>
+              <button type="button" id="btn-cloud-status" class="gs-btn primary" onclick="openAuthModal()" style="width:100%;">
+                <span id="cloud-status-icon">☁️</span> <span id="cloud-status-text">クラウド連携・アカウント切替を開く</span>
               </button>
-              <button type="button" class="gs-btn" onclick="copyGasSetupScript()">
-                ⚡ 自動構築GASをコピー
-              </button>
-            </div>
+            </div></div></div>
           </div>
 
-          <!-- GAS初期構築手順（折りたたみ） -->
-          <div id="gs-gas-guide" style="display:none; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:11px; color:#166534; line-height:1.5;">
-            <div style="font-weight:800; margin-bottom:4px;">🚀 1分で終わる！スプレッドシート＆ドライブ初期構築手順</div>
-            <div>① 新規Googleスプレッドシートを開き、メニューの<b>「拡張機能」＞「Apps Script」</b>を開く</div>
-            <div>② 上の<b>「⚡ 自動構築GASをコピー」</b>を押し、Apps Scriptに貼り付けて保存（💾）</div>
-            <div>③ 関数 <b><code>setupSpreadsheetAndDrive</code></b> を選んで<b>「実行」</b>を押すだけ！</div>
-            <div style="margin-top:4px; color:#047857;">→ <b>全5シート（掲示板目録・X目録・費用管理の数式・タスク・書類Drive）</b>と、Googleドライブの<b>「開示請求_証拠魚拓・書類保管庫」フォルダ（3階層）</b>が全自動で構築されます！</div>
+          <!-- 2. スプレッドシート ＆ Googleドライブ連携 -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">📊</span>
+              <span class="more-acc-title">スプレッドシート ＆ ドライブ連携</span>
+              <span class="more-acc-tag green" id="gs-conn-badge">全6シート</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad">
+              <div class="gs-desc">
+                弁護士管理用の投稿記事目録（掲示板・X共通36列）・費用管理シート・担当弁護士マスタと、アプリの案件詳細・証拠魚拓（Googleドライブ保管）を連携します。
+              </div>
+
+              <div class="gs-input-group">
+                <div class="gs-field">
+                  <label>
+                    <span>📗 Googleスプレッドシート URL / ID</span>
+                    <a onclick="openLinkedGoogleUrl('sheet')">シートを開く ↗</a>
+                  </label>
+                  <input type="url" id="gs-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." oninput="saveGsConfig()">
+                </div>
+                <div class="gs-field">
+                  <label>
+                    <span>📁 Googleドライブ 証拠・書類フォルダ URL / ID</span>
+                    <a onclick="openLinkedGoogleUrl('drive')">ドライブを開く ↗</a>
+                  </label>
+                  <input type="url" id="gs-drive-url" placeholder="https://drive.google.com/drive/folders/..." oninput="saveGsConfig()">
+                </div>
+                <div class="gs-field">
+                  <label>
+                    <span>⚙️ GAS Webアプリ同期URL（Apps Script）</span>
+                    <a onclick="toggleGasGuide()">初期構築の手順 ▾</a>
+                  </label>
+                  <input type="url" id="gs-gas-url" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveGsConfig()">
+                </div>
+                <div class="gs-btn-row" style="margin-top:2px;">
+                  <button type="button" class="gs-btn primary" onclick="syncWithGoogleSheets()">🔄 スプレッドシートと同期</button>
+                  <button type="button" class="gs-btn" onclick="copyGasSetupScript()">⚡ 自動構築GASをコピー</button>
+                </div>
+              </div>
+
+              <div id="gs-gas-guide" style="display:none; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:11px; color:#166534; line-height:1.5;">
+                <div style="font-weight:800; margin-bottom:4px;">🚀 1分で終わる！スプレッドシート＆ドライブ初期構築手順</div>
+                <div>① 新規Googleスプレッドシートを開き、メニューの<b>「拡張機能」＞「Apps Script」</b>を開く</div>
+                <div>② 上の<b>「⚡ 自動構築GASをコピー」</b>を押し、Apps Scriptに貼り付けて保存（💾）</div>
+                <div>③ 関数 <b><code>setupSpreadsheetAndDrive</code></b> を選んで<b>「実行」</b>を押すだけ！</div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; flex-wrap:wrap; gap:6px;">
+                <div style="font-size:12px; font-weight:800; color:#1E293B;">📋 設計フォーマット（全6シート）</div>
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                  <a href="spreadsheet.html" target="_blank" style="text-decoration:none; border:1px solid #059669; background:#ECFDF5; color:#065F46; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px;">📗 全画面スプシ ↗</a>
+                  <a href="kaiji_master_template.xlsx" download="開示請求管理マスター_全6シート.xlsx" style="text-decoration:none; border:none; background:#065F46; color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px;">📥 .xlsx DL</a>
+                  <button type="button" onclick="downloadCurrentSheetCsv()" style="border:1px solid #CBD5E1; background:#fff; color:#0F172A; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">CSV</button>
+                </div>
+              </div>
+
+              <div class="gs-col-legend">
+                <span><i style="background:#E8F5E9;"></i>弁護士標準列</span>
+                <span><i style="background:#FEF3C7;"></i>アプリ連携・マスタ自動参照列</span>
+              </div>
+
+              <div class="gs-sheet-tabs" id="gs-sheet-tabs">
+                <div class="gs-sheet-tab on" data-sheet="bbs" onclick="switchGsPreviewSheet('bbs')">① 掲示板目録 (共通36列)</div>
+                <div class="gs-sheet-tab" data-sheet="x" onclick="switchGsPreviewSheet('x')">② X(Twitter)目録 (共通36列)</div>
+                <div class="gs-sheet-tab" data-sheet="cost" onclick="switchGsPreviewSheet('cost')">③ 費用・入金管理 (11列)</div>
+                <div class="gs-sheet-tab" data-sheet="lawyers" onclick="switchGsPreviewSheet('lawyers')">④ 担当弁護士マスタ (6列)</div>
+                <div class="gs-sheet-tab" data-sheet="tasks" onclick="switchGsPreviewSheet('tasks')">⑤ タスク・ボール (8列)</div>
+                <div class="gs-sheet-tab" data-sheet="docs" onclick="switchGsPreviewSheet('docs')">⑥ 書類・Drive (8列)</div>
+              </div>
+              <div class="gs-table-wrap" id="gs-preview-table-wrap"></div>
+            </div></div></div>
           </div>
 
-          <!-- スプレッドシート フォーマット＆実データ プレビュー（5シート切替） -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; flex-wrap:wrap; gap:6px;">
-            <div style="font-size:12px; font-weight:800; color:#1E293B;">📋 スプレッドシート設計フォーマット（全5シート）</div>
-            <div style="display:flex; gap:4px; flex-wrap:wrap;">
-              <a href="spreadsheet.html" target="_blank" style="text-decoration:none; border:1px solid #059669; background:#ECFDF5; color:#065F46; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px;">📗 全画面スプシを開く ↗</a>
-              <a href="kaiji_master_template.xlsx" download="開示請求管理マスター_全5シート.xlsx" style="text-decoration:none; border:none; background:#065F46; color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px;">📥 .xlsx一括DL</a>
-              <button type="button" onclick="downloadCurrentSheetCsv()" style="border:1px solid #CBD5E1; background:#fff; color:#0F172A; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; cursor:pointer;">CSV</button>
-            </div>
+          <!-- 3. 開示手続の全体フローチャート -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">🗺️</span>
+              <span class="more-acc-title">開示手続の全体フローチャート</span>
+              <span class="more-acc-tag">全12ステップ</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad">
+              <div class="qa-svg-panel" style="border:none; padding:0; margin:0; box-shadow:none; background:transparent;">
+                <svg viewBox="10 18 510 1386" xmlns="http://www.w3.org/2000/svg" font-family="Hiragino Sans, Noto Sans JP, sans-serif">
+                  <defs>
+                    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b9b2c9"/></marker>
+                    <linearGradient id="fin" x1="0" x2="1"><stop offset="0" stop-color="#ef7f63"/><stop offset="1" stop-color="#f19a86"/></linearGradient>
+                    <filter id="sh" x="-10%" y="-20%" width="120%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#ef7f63" flood-opacity=".3"/></filter>
+                  </defs>
+                  <g fill="none" stroke="#b9b2c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M196 82 V143" marker-end="url(#ah)"/>
+                    <path d="M196 106 Q196 114 204 114 H394 Q402 114 402 122 V143" marker-end="url(#ah)"/>
+                    <path d="M196 204 V262" marker-end="url(#ah)"/>
+                    <path d="M196 319 V370" marker-end="url(#ah)"/>
+                    <path d="M196 431 V462 Q196 470 188 470 H105 Q97 470 97 478 V508" marker-end="url(#ah)"/>
+                    <path d="M196 462 Q196 470 204 470 H286 Q294 470 294 478 V510" marker-end="url(#ah)"/>
+                    <path d="M176 540 H215"/>
+                    <path d="M196 540 V627" marker-end="url(#ah)"/>
+                    <path d="M196 576 Q196 584 204 584 H394 Q402 584 402 592 V627" marker-end="url(#ah)"/>
+                    <path d="M196 683 V745" marker-end="url(#ah)"/>
+                    <path d="M196 802 V863" marker-end="url(#ah)"/>
+                    <path d="M196 924 V982" marker-end="url(#ah)"/>
+                    <path d="M196 946 Q196 954 204 954 H394 Q402 954 402 962 V982" marker-end="url(#ah)"/>
+                    <path d="M196 1042 V1100" marker-end="url(#ah)"/>
+                    <path d="M196 1064 Q196 1072 204 1072 H515"/>
+                    <path d="M402 1072 V1100" marker-end="url(#ah)"/>
+                    <path d="M196 1161 V1219" marker-end="url(#ah)"/>
+                    <path d="M196 1183 Q196 1191 204 1191 H394 Q402 1191 402 1199 V1219" marker-end="url(#ah)"/>
+                    <path d="M196 1275 V1337" marker-end="url(#ah)"/>
+                  </g>
+                  <g font-size="16" font-weight="700" text-anchor="middle">
+                    <rect x="117" y="27" width="158" height="55" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/><text x="196" y="60" fill="#24704f">弁護士に連絡済み</text>
+                    <rect x="117" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="170" fill="#2f2a4a">開示可能性あり<tspan x="196" dy="21">→弁護士が準備中</tspan></text>
+                    <rect x="117" y="264" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="297" fill="#2f2a4a">私の書類発送待ち</text>
+                    <rect x="117" y="372" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="397" fill="#2f2a4a">弁護士が申し立て<tspan x="196" dy="21">準備中</tspan></text>
+                    <rect x="18" y="510" width="158" height="59" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/><text x="97" y="535" fill="#d9603f">発信者情報開示命令<tspan x="97" dy="21">＋仮処分</tspan></text>
+                    <rect x="215" y="512" width="158" height="55" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/><text x="294" y="545" fill="#d9603f">発信者情報開示命令</text>
+                    <rect x="117" y="629" width="158" height="54" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/><text x="196" y="661" fill="#d9603f">開示命令</text>
+                    <rect x="117" y="747" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="780" fill="#2f2a4a">ウェブ期日待ち</text>
+                    <rect x="117" y="865" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="890" fill="#2f2a4a">ウェブ期日終了<tspan x="196" dy="21">→X側のIP開示待ち</tspan></text>
+                    <rect x="117" y="984" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="1009" fill="#2f2a4a">IP開示<tspan x="196" dy="21">→プロバイダ待ち</tspan></text>
+                    <rect x="117" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/><text x="196" y="1127" fill="#24704f">個人特定<tspan x="196" dy="21">→示談で本人連絡</tspan></text>
+                    <rect x="117" y="1221" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="196" y="1246" fill="#2f2a4a">示談了承<tspan x="196" dy="21">→振込待ち</tspan></text>
+                    <rect x="117" y="1339" width="158" height="55" rx="10" fill="url(#fin)" filter="url(#sh)"/><text x="196" y="1372" fill="#fff">振込完了</text>
+                    <g fill="#7a7690">
+                      <rect x="324" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="403" y="170">開示可能性低い<tspan x="403" dy="21">→終了</tspan></text>
+                      <rect x="324" y="629" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="403" y="654">開示不可<tspan x="403" dy="21">（裁判所判断）</tspan></text>
+                      <rect x="324" y="984" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="403" y="1007">IP開示不可<tspan x="403" dy="21">（X拒否）</tspan></text>
+                      <rect x="324" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="403" y="1127">個人特定不可<tspan x="403" dy="21">（プロバイダ拒否）</tspan></text>
+                      <rect x="324" y="1221" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/><text x="403" y="1246">示談破棄<tspan x="403" dy="21">→裁判準備中</tspan></text>
+                    </g>
+                  </g>
+                </svg>
+              </div>
+            </div></div></div>
           </div>
 
-          <div class="gs-col-legend">
-            <span><i style="background:#E8F5E9;"></i>弁護士標準列（掲示板・X・費用管理 必須項目）</span>
-            <span><i style="background:#FEF3C7;"></i>アプリ逆算列（案件詳細・魚拓・進捗・タスク・分析連携）</span>
+          <div class="more-sec-label">❓ よくある質問・Q&A</div>
+
+          <!-- 4. Q&A 1 -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">⏱️</span>
+              <span class="more-acc-title">Q. 開示請求にかかる全体の期間は？</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad" style="font-size:12.5px; color:#475569; line-height:1.6;">
+              IP開示まで約1〜2ヶ月、プロバイダ特定・本名開示まで約3〜6ヶ月、示談・判決まで約6〜10ヶ月が目安です。
+            </div></div></div>
           </div>
 
-          <div class="gs-sheet-tabs" id="gs-sheet-tabs">
-            <div class="gs-sheet-tab on" data-sheet="bbs" onclick="switchGsPreviewSheet('bbs')">① 掲示板目録 (共通36列)</div>
-            <div class="gs-sheet-tab" data-sheet="x" onclick="switchGsPreviewSheet('x')">② X(Twitter)目録 (共通36列)</div>
-            <div class="gs-sheet-tab" data-sheet="cost" onclick="switchGsPreviewSheet('cost')">③ 費用・入金管理 (11列)</div>
-            <div class="gs-sheet-tab" data-sheet="lawyers" onclick="switchGsPreviewSheet('lawyers')">④ 担当弁護士マスタ (6列)</div>
-            <div class="gs-sheet-tab" data-sheet="tasks" onclick="switchGsPreviewSheet('tasks')">⑤ タスク・ボール (8列)</div>
-            <div class="gs-sheet-tab" data-sheet="docs" onclick="switchGsPreviewSheet('docs')">⑥ 書類・Drive (8列)</div>
+          <!-- 5. Q&A 2 -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">🗑️</span>
+              <span class="more-acc-title">Q. 相手が投稿を削除した場合は？</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad" style="font-size:12.5px; color:#475569; line-height:1.6;">
+              魚拓スクショやURL保全データ（タイムスタンプ・ハッシュ値）があれば、削除後でも裁判所に証拠として提出可能です。
+            </div></div></div>
           </div>
 
-          <div class="gs-table-wrap" id="gs-preview-table-wrap"></div>
+          <!-- 6. Q&A 3 -->
+          <div class="more-acc">
+            <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
+              <span class="more-acc-ic">🔒</span>
+              <span class="more-acc-title">Q. 家族や職場に知られずに進められる？</span>
+              <span class="more-acc-arrow">▼</span>
+            </button>
+            <div class="more-acc-body"><div class="more-acc-inner"><div class="more-acc-pad" style="font-size:12.5px; color:#475569; line-height:1.6;">
+              「秘匿事項届出」制度を利用し、被害者の本名や住所を相手方に開示せず非公開のまま進行できます。
+            </div></div></div>
+          </div>
+
         </div>
-
-        <!-- よくある質問・Q&A -->
-        <div style="font-size:12px; font-weight:800; color:#2f2a4a; margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-          <span>❓ よくある質問・Q&A</span>
-        </div>
-
-        <div class="qa-box-card">
-          <div class="q">Q. 開示請求にかかる全体の期間は？<span>▼</span></div>
-          <p>IP開示まで約1〜2ヶ月、プロバイダ特定・本名開示まで約3〜6ヶ月、示談・判決まで約6〜10ヶ月が目安です。</p>
-        </div>
-        <div class="qa-box-card">
-          <div class="q">Q. 相手が投稿を削除した場合は？<span>▼</span></div>
-          <p>魚拓スクショやURL保全データ（タイムスタンプ・ハッシュ値）があれば、削除後でも裁判所に証拠として提出可能です。</p>
-        </div>
-        <div class="qa-box-card">
-          <div class="q">Q. 家族や職場に知られずに進められる？<span>▼</span></div>
-          <p>「秘匿事項届出」制度を利用し、被害者の本名や住所を相手方に開示せず非公開のまま進行できます。</p>
-        </div>
-
-        <!-- ご提供のSVGフローチャート（完全そのまま組み込み） -->
-        <div class="qa-svg-panel">
-          <h3>🗺️ 開示手続の全体フローチャート</h3>
-          <svg viewBox="10 18 510 1386" xmlns="http://www.w3.org/2000/svg" font-family="Hiragino Sans, Noto Sans JP, sans-serif">
-            <defs>
-              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b9b2c9"/></marker>
-              <linearGradient id="fin" x1="0" x2="1"><stop offset="0" stop-color="#ef7f63"/><stop offset="1" stop-color="#f19a86"/></linearGradient>
-              <filter id="sh" x="-10%" y="-20%" width="120%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#ef7f63" flood-opacity=".3"/></filter>
-            </defs>
-
-            <!-- ===== 線 ===== -->
-            <g fill="none" stroke="#b9b2c9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M196 82 V143" marker-end="url(#ah)"/>
-              <path d="M196 106 Q196 114 204 114 H394 Q402 114 402 122 V143" marker-end="url(#ah)"/>
-              <path d="M196 204 V262" marker-end="url(#ah)"/>
-              <path d="M196 319 V370" marker-end="url(#ah)"/>
-              <path d="M196 431 V462 Q196 470 188 470 H105 Q97 470 97 478 V508" marker-end="url(#ah)"/>
-              <path d="M196 462 Q196 470 204 470 H286 Q294 470 294 478 V510" marker-end="url(#ah)"/>
-              <path d="M176 540 H215"/>
-              <path d="M196 540 V627" marker-end="url(#ah)"/>
-              <path d="M196 576 Q196 584 204 584 H394 Q402 584 402 592 V627" marker-end="url(#ah)"/>
-              <path d="M196 683 V745" marker-end="url(#ah)"/>
-              <path d="M196 802 V863" marker-end="url(#ah)"/>
-              <path d="M196 924 V982" marker-end="url(#ah)"/>
-              <path d="M196 946 Q196 954 204 954 H394 Q402 954 402 962 V982" marker-end="url(#ah)"/>
-              <path d="M196 1042 V1100" marker-end="url(#ah)"/>
-              <path d="M196 1064 Q196 1072 204 1072 H515"/>
-              <path d="M402 1072 V1100" marker-end="url(#ah)"/>
-              <path d="M196 1161 V1219" marker-end="url(#ah)"/>
-              <path d="M196 1183 Q196 1191 204 1191 H394 Q402 1191 402 1199 V1219" marker-end="url(#ah)"/>
-              <path d="M196 1275 V1337" marker-end="url(#ah)"/>
-            </g>
-
-            <!-- ===== ノード ===== -->
-            <g font-size="16" font-weight="700" text-anchor="middle">
-              <!-- 本流 -->
-              <rect x="117" y="27" width="158" height="55" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/>
-              <text x="196" y="60" fill="#24704f">弁護士に連絡済み</text>
-
-              <rect x="117" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="170" fill="#2f2a4a">開示可能性あり<tspan x="196" dy="21">→弁護士が準備中</tspan></text>
-
-              <rect x="117" y="264" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="297" fill="#2f2a4a">私の書類発送待ち</text>
-
-              <rect x="117" y="372" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="397" fill="#2f2a4a">弁護士が申し立て<tspan x="196" dy="21">準備中</tspan></text>
-
-              <rect x="18" y="510" width="158" height="59" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
-              <text x="97" y="535" fill="#d9603f">発信者情報開示命令<tspan x="97" dy="21">＋仮処分</tspan></text>
-
-              <rect x="215" y="512" width="158" height="55" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
-              <text x="294" y="545" fill="#d9603f">発信者情報開示命令</text>
-
-              <rect x="117" y="629" width="158" height="54" rx="10" fill="#fff" stroke="#ef7f63" stroke-width="2"/>
-              <text x="196" y="661" fill="#d9603f">開示命令</text>
-
-              <rect x="117" y="747" width="158" height="55" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="780" fill="#2f2a4a">ウェブ期日待ち</text>
-
-              <rect x="117" y="865" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="890" fill="#2f2a4a">ウェブ期日終了<tspan x="196" dy="21">→X側のIP開示待ち</tspan></text>
-
-              <rect x="117" y="984" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="1009" fill="#2f2a4a">IP開示<tspan x="196" dy="21">→プロバイダ待ち</tspan></text>
-
-              <rect x="117" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#3aa776" stroke-width="2"/>
-              <text x="196" y="1127" fill="#24704f">個人特定<tspan x="196" dy="21">→示談で本人連絡</tspan></text>
-
-              <rect x="117" y="1221" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-              <text x="196" y="1246" fill="#2f2a4a">示談了承<tspan x="196" dy="21">→振込待ち</tspan></text>
-
-              <rect x="117" y="1339" width="158" height="55" rx="10" fill="url(#fin)" filter="url(#sh)"/>
-              <text x="196" y="1372" fill="#fff">振込完了</text>
-
-              <!-- 分岐先 -->
-              <g fill="#7a7690">
-                <rect x="324" y="145" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-                <text x="403" y="170">開示可能性低い<tspan x="403" dy="21">→終了</tspan></text>
-
-                <rect x="324" y="629" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-                <text x="403" y="654">開示不可<tspan x="403" dy="21">（裁判所判断）</tspan></text>
-
-                <rect x="324" y="984" width="158" height="54" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-                <text x="403" y="1007">IP開示不可<tspan x="403" dy="21">（X拒否）</tspan></text>
-
-                <rect x="324" y="1102" width="158" height="59" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-                <text x="403" y="1127">個人特定不可<tspan x="403" dy="21">（プロバイダ拒否）</tspan></text>
-
-                <rect x="324" y="1221" width="158" height="58" rx="10" fill="#fff" stroke="#e2dde8" stroke-width="1.5"/>
-                <text x="403" y="1246">示談破棄<tspan x="403" dy="21">→裁判準備中</tspan></text>
-              </g>
-            </g>
-          </svg>
-        </div>
-
       </div>
-
-      <div class="tabbar">
-        <div class="tab"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>投稿</span></div>
-        <div class="tab"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>アカウント</span></div>
-        <div class="tab tab-center-plus" title="クイック登録"><div class="center-plus-circle"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div></div>
-        <div class="tab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg><span>発信者</span></div>
-        <div class="tab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>設定・Q&A</span></div>
-      </div>
-      <div class="home-indicator"></div>
-    </div>
     </div>
 
     <!-- サブビュー：インスタ風魚拓グリッド（証拠一覧） -->
@@ -1897,7 +1884,7 @@
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125e"></script>
+<script src="js/app.js?v=20261125g"></script>
 
 </body>
 </html>
