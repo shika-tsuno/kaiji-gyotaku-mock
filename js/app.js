@@ -414,6 +414,11 @@ function closeModalIfOutside(e, modalEl) {
   }
 }
 
+function openUnifiedChatAt(label) {
+  switchView('view-chat-thread', true);
+  if (label) showToast(`統合チャット：${label} を表示`);
+}
+
 function openFlowchartInMore() {
   handleTabClick('more');
   const acc = document.getElementById('more-acc-flowchart');

@@ -567,41 +567,6 @@
           </div>
         </div>
 
-        <!-- 8. 担当弁護士チャット（インラインチャット ＆ 送信バー） -->
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">担当弁護士チャット</div>
-            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">すべて表示</div>
-          </div>
-
-          <div class="card" style="padding:14px 12px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04); display:flex; flex-direction:column; gap:10px;">
-            <!-- 弁護士からの吹出 -->
-            <div style="display:flex; gap:8px; align-items:flex-start;">
-              <div style="width:28px; height:28px; border-radius:50%; background:#475569; color:#FFFFFF; font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none;">
-                神
-              </div>
-              <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
-                東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。
-                <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">17:15</div>
-              </div>
-            </div>
-
-            <!-- ユーザーからの返信吹出 -->
-            <div style="display:flex; justify-content:flex-end;">
-              <div style="background:linear-gradient(135deg, #D4553B 0%, #C2432A 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(194,67,42,0.22);">
-                ご連絡ありがとうございます！仮処分決定で安心しました。引き続きよろしくお願いいたします。
-                <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">既読 17:18</div>
-              </div>
-            </div>
-
-            <!-- チャットメッセージ入力欄 -->
-            <div style="display:flex; gap:6px; margin-top:4px; padding-top:8px; border-top:1px solid var(--sys-separator);">
-              <input type="text" placeholder="弁護士へメッセージ..." style="flex:1; border:1px solid rgba(155,143,178,0.24); border-radius:20px; padding:6px 12px; font-size:12px; outline:none; background:#FAF9F7;" readonly>
-              <button style="background:var(--sunrise-grad); color:#FFFFFF; border:none; border-radius:20px; padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer;">送信</button>
-            </div>
-          </div>
-        </div>
-
         <!-- 9. 関連書類・証拠ファイル（4件リスト ＆ 追加リンク） -->
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -867,51 +832,49 @@
           </div>
         </div>
 
-        <!-- ===== パネル5：チャットタブ（弁護士とのメッセージ全履歴＆送信） ===== -->
+        <!-- ===== パネル5：チャットタブ（統合チャットからのAI自動紐付けリンク一覧） ===== -->
         <div id="kpanel-chat" class="karte-panel">
           <div class="k-card" style="padding:14px; display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--sys-separator);">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <div style="width:30px; height:30px; border-radius:50%; background:#475569; color:#fff; font-size:12px; font-weight:800; display:grid; place-items:center;">神</div>
-                <div>
-                  <div style="font-size:13px; font-weight:800; color:var(--sys-label-primary);">神田 敬一 弁護士</div>
-                  <div style="font-size:10.5px; color:var(--sys-label-secondary);">神田法律事務所 · #04 ダミー次郎</div>
-                </div>
-              </div>
-              <span class="k-pill info">担当弁護士</span>
+            <div style="background:#FAF2EE; border:1px solid rgba(194,67,42,0.16); border-radius:12px; padding:10px 12px; font-size:11.5px; color:#4A3E43; line-height:1.5;">
+              <div style="font-weight:800; color:#C2432A; margin-bottom:2px;">✨ AI自動紐付け（統合チャット連動）</div>
+              チャットは弁護士との<strong>1本のみ</strong>で管理されます。この投稿に関係するやり取りや添付書類をAIが自動判定し、該当箇所へのリンクを表示します。
             </div>
 
-            <div id="karte-chat-messages" style="display:flex; flex-direction:column; gap:10px;">
-              <div style="text-align:center; font-size:10.5px; color:#94A3B8;">2026年10月20日</div>
-              <div style="display:flex; gap:8px; align-items:flex-start;">
-                <div style="width:26px; height:26px; border-radius:50%; background:#475569; color:#fff; font-size:11px; font-weight:800; display:grid; place-items:center; flex:none;">神</div>
-                <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
-                  東京地裁へ発信者情報開示命令および仮処分の申立てを完了しました。進捗タイムラインを更新しております。
-                  <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">14:10</div>
-                </div>
+            <!-- AI紐付けリンク 1：書類添付 → 進捗＆書類へ自動登録されたチャット -->
+            <div onclick="openUnifiedChatAt('開示命令書_20261020.pdf の送信箇所')" style="background:#FFFFFF; border:1px solid rgba(70,50,60,0.14); border-radius:14px; padding:12px; cursor:pointer; display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; font-weight:800; color:#2B2433;">📎 開示命令書_20261020.pdf</span>
+                <span style="font-size:10px; color:#8C8296; font-family:monospace;">10/20 14:10</span>
               </div>
-
-              <div style="text-align:center; font-size:10.5px; color:#94A3B8;">2026年10月26日</div>
-              <div style="display:flex; gap:8px; align-items:flex-start;">
-                <div style="width:26px; height:26px; border-radius:50%; background:#475569; color:#fff; font-size:11px; font-weight:800; display:grid; place-items:center; flex:none;">神</div>
-                <div style="background:#F1F5F9; color:#1E293B; padding:9px 12px; border-radius:4px 14px 14px 14px; font-size:12px; line-height:1.45; max-width:82%;">
-                  東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。次回口頭弁論は11/12（木）13:30です。
-                  <div style="font-size:9.5px; color:#94A3B8; text-align:right; margin-top:3px;">17:15</div>
-                </div>
+              <div style="font-size:12px; color:#4A3E43; line-height:1.5;">
+                「東京地裁より開示命令書を受領しました（サンプル太郎・ダミー次郎）。添付にて共有します。」
               </div>
-
-              <div style="display:flex; justify-content:flex-end;">
-                <div style="background:linear-gradient(135deg, #D4553B 0%, #C2432A 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(194,67,42,0.22);">
-                  ご連絡ありがとうございます！仮処分決定で安心しました。引き続きよろしくお願いいたします。
-                  <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">既読 17:18</div>
-                </div>
+              <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                <span class="k-pill ok">✓ 進捗へ自動登録</span>
+                <span class="k-pill ok">✓ 書類タブへ自動登録</span>
+                <span class="k-pill warn">対象：#01・#04</span>
               </div>
+              <div style="font-size:11.5px; font-weight:700; color:#C2432A; text-align:right;">統合チャットの該当箇所へ飛ぶ ›</div>
             </div>
 
-            <div style="display:flex; gap:6px; margin-top:4px; padding-top:10px; border-top:1px solid var(--sys-separator);">
-              <input type="text" id="karte-chat-input" placeholder="弁護士へメッセージを入力..." style="flex:1; border:1px solid rgba(155,143,178,0.3); border-radius:20px; padding:8px 14px; font-size:12.5px; outline:none; background:#FAF9F7;" onkeydown="if(event.key==='Enter')sendKarteChat()">
-              <button type="button" onclick="sendKarteChat()" style="background:#C2432A; color:#FFFFFF; border:none; border-radius:20px; padding:8px 16px; font-size:12.5px; font-weight:800; cursor:pointer;">送信</button>
+            <!-- AI紐付けリンク 2：仮処分決定＆次回期日 -->
+            <div onclick="openUnifiedChatAt('仮処分決定・次回期日の連絡箇所')" style="background:#FFFFFF; border:1px solid rgba(70,50,60,0.14); border-radius:14px; padding:12px; cursor:pointer; display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; font-weight:800; color:#2B2433;">神田 敬一 弁護士</span>
+                <span style="font-size:10px; color:#8C8296; font-family:monospace;">10/26 17:15</span>
+              </div>
+              <div style="font-size:12px; color:#4A3E43; line-height:1.5;">
+                「東京地裁から仮処分決定を受領しました。来週にはXからのIP開示がされる見込みです。次回口頭弁論は11/12（木）13:30です。」
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                <span class="k-pill ok">✓ 次回期日を自動登録</span>
+              </div>
+              <div style="font-size:11.5px; font-weight:700; color:#C2432A; text-align:right;">統合チャットの該当箇所へ飛ぶ ›</div>
             </div>
+
+            <button type="button" onclick="openChatFromBubble()" style="width:100%; padding:11px; border:none; border-radius:12px; background:var(--sunrise-grad); color:#FFFFFF; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit;">
+              統合チャットを開く（弁護士へ連絡） ›
+            </button>
           </div>
         </div>
 
@@ -1978,7 +1941,7 @@
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125u"></script>
+<script src="js/app.js?v=20261125v"></script>
 
 </body>
 </html>
