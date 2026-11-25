@@ -331,7 +331,7 @@ function sendKarteChat() {
   const mm = String(now.getMinutes()).padStart(2, '0');
   const div = document.createElement('div');
   div.style.cssText = 'display:flex; justify-content:flex-end;';
-  div.innerHTML = `<div style="background:linear-gradient(135deg, #FF8A65 0%, #FF6E6E 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(255,110,110,0.25);">
+  div.innerHTML = `<div style="background:linear-gradient(135deg, #D4553B 0%, #C2432A 100%); color:#FFFFFF; padding:9px 12px; border-radius:14px 14px 4px 14px; font-size:12px; line-height:1.45; max-width:82%; box-shadow:0 3px 10px rgba(194,67,42,0.22);">
     ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
     <div style="font-size:9.5px; color:rgba(255,255,255,0.85); text-align:right; margin-top:3px;">送信済 ${hh}:${mm}</div>
   </div>`;
@@ -383,7 +383,7 @@ function initCasesView() {
   ];
 
   const pad = n => '#' + String(n).padStart(2, '0');
-  const ICON = { warn: '⚠️ ', go: '→ ', done: '✓ ', stop: '■ ' };
+  const ICON = { warn: '● ', go: '→ ', done: '✓ ', stop: '■ ' };
   const ST = ['依頼者待ち', '準備中', '進行中', '終了', '止まった'];
   const SVN = { X: '𝕏 (Twitter)', '5ch': '5ちゃんねる' };
   const GROUPS = [['sv', '媒体別'], ['st', '進捗別'], ['pv', 'プロバイダ別'], ['date', '月別'], ['snd', '発信者別']];
@@ -557,8 +557,8 @@ function initBallsAndTasks() {
 
   // 人型SVGを描画
   courts.forEach(({ prefix, court }) => {
-    court.querySelector('.sr-side.me .sr-fig').innerHTML = makeFig(prefix, '#FF9A7A', '#EE5E43', 0, '');
-    court.querySelector('.sr-side.law .sr-fig').innerHTML = makeFig(prefix, '#CBBDF4', '#A796E2', 1, '<path d="M50 58 L45 66 L50 86 L55 66 Z" fill="#6E5FA8"/><circle cx="62" cy="70" r="4" fill="#F5C542" stroke="#fff" stroke-width="1"/>');
+    court.querySelector('.sr-side.me .sr-fig').innerHTML = makeFig(prefix, '#DC6A53', '#C2432A', 0, '');
+    court.querySelector('.sr-side.law .sr-fig').innerHTML = makeFig(prefix, '#8C8288', '#5A5056', 1, '<path d="M50 58 L45 66 L50 86 L55 66 Z" fill="#3E3538"/><circle cx="62" cy="70" r="4" fill="#D4A373" stroke="#fff" stroke-width="1"/>');
 
     // サイド切替
     court.querySelectorAll('.sr-side').forEach(s => {
@@ -726,9 +726,9 @@ function initBallsAndTasks() {
    ============================================================ */
 function initAnalyticsCharts() {
   const SER = [
-    { k: 'start', name: '着手率', color: '#AF52DE' },
+    { k: 'start', name: '着手率', color: '#5A4E52' },
     { k: 'ok', name: '開示成功率', color: '#C2432A' },
-    { k: 'pay', name: '回収率', color: '#30B0C7' },
+    { k: 'pay', name: '回収率', color: '#A67C68' },
   ];
   const today = new Date(2026, 10, 19);
   const DATA = [];
@@ -749,7 +749,7 @@ function initAnalyticsCharts() {
 
   const WHY = {
     start: {
-      label: '見送り', tone: ['#AF52DE', '#A592E6', '#CBBFF2', '#E6E0FA'],
+      label: '見送り', tone: ['#5A4E52', '#82767A', '#AEA4A8', '#DCD6D8'],
       R: [
         ['権利侵害がはっきりしない', [['#12', 'とおりすがりC', 'ただの悪口で名誉毀損に当たりにくい'], ['#16', '匿名レス230', '意見・論評の範囲と判断'], ['#18', 'ぼやきD', '誰のことか特定しにくい']]],
         ['証拠が足りない', [['#14', '名無しE', 'URL・投稿日時が写っていない']]],
@@ -759,7 +759,7 @@ function initAnalyticsCharts() {
       tip: '見送りの半分が「権利侵害がはっきりしない」です。単なる悪口より、うそで評判を下げる投稿（名誉毀損）を優先して渡すと、着手してもらいやすくなりそうです。'
     },
     ok: {
-      label: '開示されなかった', tone: ['#C2432A', '#F08C76', '#F7B9AA', '#FCE0D8'],
+      label: '開示されなかった', tone: ['#C2432A', '#DC7A65', '#EEB2A5', '#F9DDD7'],
       R: [
         ['裁判所が却下', [['#12', 'とおりすがりC', '権利侵害が明らかとはいえない'], ['#15', '匿名レス61', '同上']]],
         ['VPN・海外経由で特定できず', [['#08', '匿名レス512', 'VPN経由']]],
@@ -769,7 +769,7 @@ function initAnalyticsCharts() {
       tip: '却下が多めです。投稿から3か月以内に申し立てた案件ほど通りやすい傾向があります。'
     },
     pay: {
-      label: '未回収', tone: ['#30B0C7', '#5DB3C6', '#9CD3DF', '#D6EEF3'],
+      label: '未回収', tone: ['#A67C68', '#BF9B89', '#D8BEB1', '#EFE3DC'],
       R: [
         ['相手に支払う資力がない', [['#09', '匿名レス95', '弁護士が資力なしと確認'], ['#11', '匿名レス702', '同上'], ['#20', 'くちわるH', '同上']]],
         ['連絡がつかない', [['#21', '名無しI', '書面が戻ってきた']]],

@@ -6,24 +6,24 @@
     --sys-fill-tertiary: rgba(155, 143, 178, 0.12);
     --sys-separator: rgba(155, 143, 178, 0.16);
 
-    /* コーラルピーチ・ソフトグロウのグラデーション */
-    --sunrise-grad: linear-gradient(135deg, #FF8A65 0%, #FF6E6E 100%);
-    --sunrise-grad-soft: linear-gradient(135deg, rgba(255, 138, 101, 0.16) 0%, rgba(253, 246, 242, 0.75) 100%);
-    --sunrise-line: linear-gradient(180deg, #FF8A65 0%, #FF6E6E 100%);
+    /* ブランドカラー統一：クラシックテラコッタ赤 (#C2432A) × ウォームチャコール */
+    --sunrise-grad: linear-gradient(135deg, #D4553B 0%, #C2432A 100%);
+    --sunrise-grad-soft: linear-gradient(135deg, rgba(194, 67, 42, 0.12) 0%, rgba(250, 242, 238, 0.75) 100%);
+    --sunrise-line: linear-gradient(180deg, #D4553B 0%, #C2432A 100%);
 
-    --accent-peach: #FF7557;
-    --accent-peach-light: rgba(255, 138, 101, 0.14);
-    --accent-peach-text: #E06043;
-    --accent-coral-grad: linear-gradient(135deg, #FF8A65, #FF6E6E);
-    --accent-blue: #FF7557;
-    --accent-blue-light: rgba(255, 138, 101, 0.14);
-    --accent-blue-text: #E06043;
+    --accent-peach: #C2432A;
+    --accent-peach-light: rgba(194, 67, 42, 0.10);
+    --accent-peach-text: #C2432A;
+    --accent-coral-grad: linear-gradient(135deg, #D4553B, #C2432A);
+    --accent-blue: #C2432A;
+    --accent-blue-light: rgba(194, 67, 42, 0.10);
+    --accent-blue-text: #C2432A;
 
-    --sys-blue: #FF7557;
-    --gold-deep: #E06043;
-    --sys-green: #10B981;
-    --sys-orange: #FF7557;
-    --sys-red: #FF6E6E;
+    --sys-blue: #C2432A;
+    --gold-deep: #C2432A;
+    --sys-green: #5A4E52;
+    --sys-orange: #C2432A;
+    --sys-red: #C2432A;
     --sys-gray: #7E7296;
     --sys-gray4: rgba(155, 143, 178, 0.28);
     --row-zebra: #FAF5F2;
@@ -3634,14 +3634,14 @@ html, body {
   --sr-label: #2B2433;
   --sr-label2: #6F6478;
   --sr-label3: rgba(43, 36, 51, .42);
-  --sr-sep: rgba(70, 50, 60, .16);
-  --sr-green: #0F7A58;
-  --sr-go: #1E9E5A;
-  --sr-warn: #E2760B;
-  --sr-done: #6F879A;
-  --sr-purple: #AF52DE;
-  --sr-purple-dk: #8944AB;
-  --sr-teal: #30B0C7;
+  --sr-sep: rgba(70, 50, 60, .14);
+  --sr-green: #5A4E52;
+  --sr-go: #6B5E63;
+  --sr-warn: #C2432A;
+  --sr-done: #857A7F;
+  --sr-purple: #5A4E52;
+  --sr-purple-dk: #4A3E43;
+  --sr-teal: #A67C68;
 }
 
 /* 5タブ用フッターバー調整 */
@@ -4216,8 +4216,8 @@ html, body {
   background: var(--sr-tint);
   border-radius: 2px;
 }
-.c33-bar.done i { background: #1BB46A; }
-.c33-bar.stop i { background: #A9B8C4; }
+.c33-bar.done i { background: #5A4E52; }
+.c33-bar.stop i { background: #C2B9BD; }
 .c33-row.end .c33-av { background: #ECEAF2; color: #6F879A; }
 .c33-row.end .c33-nm { color: var(--sr-done); }
 .c33-row.end .c33-no { background: #EEEAEE; color: #6F879A; }
@@ -4323,8 +4323,8 @@ html, body {
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFF3C4 0 18%, #FFC14D 45%, #F29A1F 100%);
-  box-shadow: 0 1px 2px rgba(150, 80, 0, .35);
+  background: radial-gradient(circle at 35% 30%, #FFF7F2 0 22%, #E8A68F 55%, #C2432A 100%);
+  box-shadow: 0 1px 2px rgba(194, 67, 42, .30);
   display: inline-block;
   flex: none;
 }
@@ -4544,7 +4544,7 @@ html, body {
   bottom: 44px;
   width: 2px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #10B981 0%, #10B981 36%, #FF8A65 65%, #CBD5E1 100%);
+  background: linear-gradient(180deg, #5A4E52 0%, #5A4E52 36%, #C2432A 65%, #D6CECA 100%);
 }
 .sr-mr {
   position: relative;
@@ -4568,27 +4568,27 @@ html, body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #10B981;
+  background: #5A4E52;
   border: 2.5px solid #FFFFFF;
-  box-shadow: 0 0 0 1.5px #10B981;
+  box-shadow: 0 0 0 1.5px #5A4E52;
   display: grid;
   place-items: center;
   z-index: 2;
 }
 .sr-mr.is-active {
-  background: linear-gradient(135deg, rgba(255, 138, 101, 0.12) 0%, rgba(255, 110, 110, 0.16) 100%);
-  border: 1.5px solid #FF8A65;
+  background: rgba(194, 67, 42, 0.07);
+  border: 1.5px solid rgba(194, 67, 42, 0.55);
   border-radius: 14px;
   padding: 10px 12px;
   margin: 4px 0 8px;
 }
 .sr-mr.is-active .dot {
-  background: #FF6E6E;
+  background: #C2432A;
   border: 2.5px solid #FFFFFF;
-  box-shadow: 0 0 0 2px #FF6E6E;
+  box-shadow: 0 0 0 2px #C2432A;
 }
 .sr-mr.is-later .dot {
-  background: #CBD5E1;
+  background: #D6CECA;
   border: 2.5px solid #FFFFFF;
   box-shadow: none;
 }
@@ -4596,9 +4596,9 @@ html, body {
   width: 18px;
   height: 18px;
   left: -26px;
-  background: #FF6E6E;
+  background: #C2432A;
   border: 2.5px solid #FFFFFF;
-  box-shadow: 0 0 0 1.5px #FF6E6E;
+  box-shadow: 0 0 0 1.5px #C2432A;
   color: #fff;
   font-size: 9px;
 }
@@ -4690,8 +4690,9 @@ html, body {
 }
 .sr-cheer-bubble {
   flex: 1;
-  background: #FEF3C7;
-  color: #5C4308;
+  background: #FAF2EE;
+  color: #4A3E43;
+  border: 1px solid rgba(194, 67, 42, 0.14);
   font-size: 13px;
   font-weight: 700;
   padding: 8px 14px;
@@ -4706,7 +4707,7 @@ html, body {
   transform: translateY(-50%);
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-right: 6px solid #FEF3C7;
+  border-right: 6px solid #FAF2EE;
 }
 .sr-cheer-prog {
   height: 6px;
@@ -4718,7 +4719,7 @@ html, body {
 .sr-cheer-prog i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #F59E0B, var(--sr-tint));
+  background: linear-gradient(90deg, #DC7A65, var(--sr-tint));
   border-radius: 999px;
   transition: width .3s ease;
 }
@@ -4971,15 +4972,15 @@ html, body {
   align-self: flex-start;
   margin-top: 2px;
 }
-.sr-why.court { background: #F4E8FA; color: var(--sr-purple-dk); }
-.sr-why.pv { background: #E1F4F8; color: #1E8296; }
+.sr-why.court { background: #EFECEB; color: #4A3E43; }
+.sr-why.pv { background: rgba(194, 67, 42, 0.10); color: #C2432A; }
 .sr-alt { color: var(--sr-purple-dk) !important; margin-top: 2px; font-weight: 600; }
 .sr-alt em { font-style: normal; font-weight: 700; text-decoration: underline; }
 .sr-rbtn {
   margin-top: 12px;
   height: 38px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #C17FE6, var(--sr-purple));
+  background: linear-gradient(135deg, #5A4E52, #3E3538);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -4988,9 +4989,9 @@ html, body {
   cursor: pointer;
 }
 .sr-rbtn.soft {
-  background: linear-gradient(135deg, rgba(175, 82, 222, .12), rgba(175, 82, 222, .24));
-  border: 1px solid rgba(175, 82, 222, .3);
-  color: var(--sr-purple-dk);
+  background: #F4F0EE;
+  border: 1px solid rgba(90, 78, 82, .22);
+  color: #4A3E43;
 }
 
 /* =========================================================================
@@ -5359,9 +5360,9 @@ html, body {
   border-radius: 6px;
   white-space: nowrap;
 }
-.k-pill.ok { background: rgba(16, 185, 129, 0.14); color: #047857; }
+.k-pill.ok { background: #EFECEB; color: #4A3E43; }
 .k-pill.warn { background: rgba(194, 67, 42, 0.12); color: #C2432A; }
-.k-pill.info { background: rgba(59, 130, 246, 0.12); color: #1D4ED8; }
+.k-pill.info { background: rgba(194, 67, 42, 0.08); color: #8C3423; }
 
 /* =========================================================================
    その他タブ：1行表示 → ▼タップで下にギュンッと開くアコーディオンUI
@@ -5429,8 +5430,8 @@ html, body {
   flex: none;
 }
 .more-acc-tag.green {
-  background: #ECFDF5;
-  color: #047857;
+  background: rgba(194, 67, 42, 0.10);
+  color: #C2432A;
 }
 .more-acc-arrow {
   font-size: 11px;
