@@ -496,16 +496,19 @@ function initHomeWidgets() {
     try { MED = JSON.parse(localStorage.getItem('komaColor') || '{}'); } catch (e) {}
     const mc = k => MED[k] || MED_DEF[k][1];
     const MS = [
-      ['スクショ提出', '弁護士へ渡した', ['x', 'suki']],
-      ['開示請求中', 'IP・発信者情報', ['x', 'x', 'ch5']],
-      ['プロバイダ回答待ち', '契約者情報', ['suki', 'ig']],
-      ['相手判明', '氏名・住所', ['x', 'yt']],
-      ['解決', '示談・判決', ['x']]
+      ['スクショ提出', '弁護士へ渡した', ['x', 'suki'], 'done'],
+      ['開示請求中', 'IP・発信者情報', ['x', 'x', 'ch5'], 'active'],
+      ['プロバイダ回答待ち', '契約者情報', ['suki', 'ig'], 'later'],
+      ['相手判明', '氏名・住所', ['x', 'yt'], 'later'],
+      ['解決', '示談・判決', ['x'], 'goal']
     ];
     const pawn = (c, d) => `<svg viewBox="0 0 16 24" style="animation-delay:${d * 60}ms"><ellipse cx="8" cy="22" rx="6.5" ry="1.8" fill="rgba(0,24,58,.18)"/><g fill="${c}" stroke="rgba(0,24,58,.45)" stroke-width=".8"><path d="M8 10c-2.6 0-4 5.5-5.2 10.5h10.4C12 15.5 10.6 10 8 10z"/><circle cx="8" cy="6.5" r="4.2"/></g><circle cx="6.6" cy="5.2" r="1.3" fill="#fff" opacity=".5"/></svg>`;
     let ki = 0;
     const used = new Set(MS.flatMap(m => m[2]));
-    msEl.innerHTML = MS.map(([nm, sb, ks], i) => `<div class="sr-mr${i === MS.length - 1 ? ' goal' : ''}"><span class="dot">${i === MS.length - 1 ? '🏁' : ''}</span><span class="nm">${nm}<small>${sb}</small></span><span class="kp">${ks.length ? ks.map(k => pawn(mc(k), ki++)).join('') : '<span class="none">—</span>'}</span><b>${ks.length}<small>件</small></b></div>`).join('')
+    msEl.innerHTML = MS.map(([nm, sb, ks, state], i) => {
+      const cls = state === 'active' ? ' is-active' : state === 'later' ? ' is-later' : state === 'goal' ? ' goal' : '';
+      return `<div class="sr-mr${cls}"><span class="dot">${state === 'goal' ? '🏁' : ''}</span><span class="nm">${nm}<small>${sb}</small></span><span class="kp">${ks.length ? ks.map(k => pawn(mc(k), ki++)).join('') : '<span class="none">—</span>'}</span><b>${ks.length}<small>件</small></b></div>`;
+    }).join('')
       + `<div class="sr-mleg">${[...used].map(k => `<span><i style="background:${mc(k)}"></i>${MED_DEF[k][0]}</span>`).join('')}</div>`;
     msEl.querySelectorAll('.sr-mr').forEach(el => { el.onclick = () => handleTabClick('cases'); });
   }
