@@ -10,7 +10,7 @@
 <title>開示請求 進捗管理アプリ</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
-<link rel="stylesheet" href="css/app.css?v=20261125t">
+<link rel="stylesheet" href="css/app.css?v=20261125u">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -436,19 +436,21 @@
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <div style="font-size:14px; font-weight:800; color:var(--sys-label-primary);">手続の進捗</div>
-            <div style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">フロー全体 ›</div>
+            <div onclick="openFlowchartInMore()" style="font-size:12px; font-weight:700; color:var(--accent-peach-text); cursor:pointer;">フロー全体 ›</div>
           </div>
 
           <!-- ご指示反映：⑥のボタンと同じボタンで「進捗追加」ボタンを新設 -->
-          <div style="background:var(--sunrise-grad); color:#FFF; border-radius:12px; padding:9px 14px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:800; box-shadow:0 3px 10px rgba(255, 110, 110, 0.28); cursor:pointer; margin-bottom:10px;">
+          <div onclick="openAddProgressModal()" style="background:var(--sunrise-grad); color:#FFF; border-radius:12px; padding:9px 14px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:800; box-shadow:0 3px 10px rgba(194, 67, 42, 0.25); cursor:pointer; margin-bottom:10px;">
             <svg viewBox="0 0 24 24" style="width:15px; height:15px; stroke:#FFF; stroke-width:2.5; fill:none;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             <span>進捗を追加</span>
           </div>
 
           <div class="card" style="padding:14px 12px; background:#FFFFFF; border:1px solid rgba(155,143,178,0.18); border-radius:18px; box-shadow:0 2px 8px rgba(59,48,84,0.04);">
-            <div class="tl" style="position:relative; padding-left:22px;">
+            <div class="tl" id="kd-timeline" style="position:relative; padding-left:22px;">
               <!-- 縦線 -->
               <div style="position:absolute; left:6px; top:8px; bottom:12px; width:2px; background:linear-gradient(180deg, #5A4E52 0%, #C2432A 60%, #D6CECA 100%);"></div>
+              <!-- 追加された進捗ステップ差し込み先 -->
+              <div id="kd-timeline-added"></div>
 
               <!-- ステップ 1: 投稿 -->
               <div style="position:relative; margin-bottom:14px;">
@@ -1336,7 +1338,7 @@
           </div>
 
           <!-- 3. 開示手続の全体フローチャート -->
-          <div class="more-acc">
+          <div class="more-acc" id="more-acc-flowchart">
             <button type="button" class="more-acc-head" onclick="toggleMoreAcc(this)">
               <span class="more-acc-ic">🗺️</span>
               <span class="more-acc-title">開示手続の全体フローチャート</span>
@@ -1923,6 +1925,49 @@
   </div>
 </div>
 
+<!-- 進捗を追加モーダル -->
+<div id="add-progress-modal" class="modal-overlay" onclick="closeModalIfOutside(event, this)">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title">進捗を追加</div>
+      <button type="button" class="modal-close" onclick="closeAddProgressModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:14px 16px 20px; display:flex; flex-direction:column; gap:12px;">
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#4A3E43; margin-bottom:5px;">手続きステップ</label>
+        <select id="prog-step-select" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(70,50,60,0.18); background:#FAFAFA; font-size:13px; color:#2B2433; font-family:inherit;">
+          <option value="魚拓保全・証拠整理">Step 01：魚拓保全・証拠整理</option>
+          <option value="弁護士へ共有・依頼">Step 02：弁護士へ共有・依頼</option>
+          <option value="コンテンツ提供者へ開示申立">Step 03：コンテンツ提供者へ開示申立</option>
+          <option value="X社からIPアドレス開示受領" selected>Step 04：X社からIPアドレス開示受領</option>
+          <option value="経由プロバイダ特定">Step 05：経由プロバイダ特定</option>
+          <option value="プロバイダへ発信者情報開示請求">Step 06：プロバイダへ発信者情報開示請求</option>
+          <option value="意見照会書・回答待ち">Step 07：意見照会書・回答待ち</option>
+          <option value="発信者情報開示（氏名・住所判明）">Step 08：発信者情報開示（氏名・住所判明）</option>
+          <option value="内容証明送付・示談交渉">Step 09：内容証明送付・示談交渉</option>
+          <option value="示談成立・振込待ち">Step 10：示談成立・振込待ち</option>
+          <option value="解決（入金完了）">Step 12：解決（入金完了）</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#4A3E43; margin-bottom:5px;">日付</label>
+        <input type="date" id="prog-date-input" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(70,50,60,0.18); background:#FAFAFA; font-size:13px; color:#2B2433; font-family:inherit;">
+      </div>
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#4A3E43; margin-bottom:5px;">メモ・補足（任意）</label>
+        <textarea id="prog-memo-input" rows="2" placeholder="例：X社からIP開示の回答書を受領。次はソフトバンクへ照会。" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(70,50,60,0.18); background:#FAFAFA; font-size:13px; color:#2B2433; font-family:inherit; resize:none;"></textarea>
+      </div>
+      <div>
+        <label style="display:block; font-size:12px; font-weight:700; color:#4A3E43; margin-bottom:5px;">次回期日・予定（任意）</label>
+        <input type="text" id="prog-next-input" placeholder="例：12/05（金）14:00 口頭弁論" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(70,50,60,0.18); background:#FAFAFA; font-size:13px; color:#2B2433; font-family:inherit;">
+      </div>
+      <button type="button" onclick="handleSaveProgress()" style="width:100%; padding:12px; border:none; border-radius:12px; background:var(--sunrise-grad); color:#FFFFFF; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; margin-top:4px;">
+        タイムラインに追加する
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- 添付画像 原寸拡大ライトボックス -->
 <div id="media-lightbox-modal" class="media-lightbox" onclick="closeMediaLightbox()">
   <button type="button" class="media-lightbox-close" onclick="closeMediaLightbox()" aria-label="閉じる">✕</button>
@@ -1933,7 +1978,7 @@
 <!-- トースト表示 -->
 <div id="toast" class="toast-msg"></div>
 
-<script src="js/app.js?v=20261125t"></script>
+<script src="js/app.js?v=20261125u"></script>
 
 </body>
 </html>

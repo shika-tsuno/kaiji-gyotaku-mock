@@ -414,6 +414,69 @@ function closeModalIfOutside(e, modalEl) {
   }
 }
 
+function openFlowchartInMore() {
+  handleTabClick('more');
+  const acc = document.getElementById('more-acc-flowchart');
+  if (acc) {
+    acc.classList.add('open');
+    setTimeout(() => acc.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+  }
+}
+
+function openAddProgressModal() {
+  const dateInp = document.getElementById('prog-date-input');
+  if (dateInp && !dateInp.value) dateInp.value = new Date().toISOString().slice(0, 10);
+  const memoInp = document.getElementById('prog-memo-input');
+  const nextInp = document.getElementById('prog-next-input');
+  if (memoInp) memoInp.value = '';
+  if (nextInp) nextInp.value = '';
+  const modal = document.getElementById('add-progress-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeAddProgressModal() {
+  const modal = document.getElementById('add-progress-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function renderAddedProgressTimeline() {
+  const box = document.getElementById('kd-timeline-added');
+  if (!box) return;
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('kaiji_added_progress_v1') || '[]'); } catch {}
+  if (!Array.isArray(list) || !list.length) { box.innerHTML = ''; return; }
+  box.innerHTML = list.map(item => `
+    <div style="position:relative; margin-bottom:14px;">
+      <div style="position:absolute; left:-22px; top:3px; width:14px; height:14px; border-radius:50%; background:#C2432A; border:2.5px solid #FFFFFF; box-shadow:0 0 0 2px #C2432A;"></div>
+      <div style="background:rgba(194,67,42,0.06); border:1px solid rgba(194,67,42,0.28); border-radius:12px; padding:8px 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+          <span style="font-size:12.5px; font-weight:800; color:#2B2433;">${item.step}</span>
+          <span style="font-size:10.5px; color:#C2432A; font-weight:700; font-family:monospace;">${item.dateLabel}</span>
+        </div>
+        ${item.memo ? `<div style="font-size:11px; color:#5A4E52; margin-top:4px; line-height:1.45;">${item.memo}</div>` : ''}
+        ${item.next ? `<div style="font-size:10.5px; color:#C2432A; font-weight:700; margin-top:4px;">📅 次回：${item.next}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleSaveProgress() {
+  const step = (document.getElementById('prog-step-select')?.value || '').trim();
+  const dateRaw = (document.getElementById('prog-date-input')?.value || '').trim();
+  const memo = (document.getElementById('prog-memo-input')?.value || '').trim();
+  const next = (document.getElementById('prog-next-input')?.value || '').trim();
+  if (!step) return;
+  const parts = dateRaw.split('-');
+  const dateLabel = parts.length === 3 ? `${Number(parts[1])}/${Number(parts[2])}` : '今日';
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('kaiji_added_progress_v1') || '[]'); } catch {}
+  list.unshift({ step, dateRaw, dateLabel, memo, next, createdAt: Date.now() });
+  localStorage.setItem('kaiji_added_progress_v1', JSON.stringify(list.slice(0, 30)));
+  renderAddedProgressTimeline();
+  closeAddProgressModal();
+  showToast(`「${step}」をタイムラインに追加しました`);
+}
+
 function openMediaLightbox(url) {
   const modal = document.getElementById('media-lightbox-modal');
   const img = document.getElementById('media-lightbox-img');
@@ -623,6 +686,7 @@ function initCasesView() {
     if ($('kd-shot-stats')) $('kd-shot-stats').innerHTML = `<span>💬 ${d.replies ?? 14}</span><span>🔁 ${d.retweets ?? 42}</span><span>❤️ ${d.likes ?? 128}</span><span>🔖 ${d.bookmarks ?? 19}</span>`;
     if ($('kd-captured-at')) $('kd-captured-at').textContent = `保全日時: ${d.capturedAt || d.date + ' 21:18:24 JST'}`;
     if ($('kd-sha256')) $('kd-sha256').textContent = `SHA-256: ${d.sha256 || '8f4a3c10b7e289...d9a04ef12'}`;
+    renderAddedProgressTimeline();
   }
 
   function renderList() {
