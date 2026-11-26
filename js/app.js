@@ -1806,3 +1806,248 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+
+/* ==========================================================================
+   開示検討リスト（タスクページ内）
+   ========================================================================== */
+(function () {
+  const REVIEW_STORAGE_KEY = "kaiji_review_list_v1";
+  let currentReviewTab = "all";
+
+  const DEFAULT_REVIEW_ITEMS = [
+    {
+      id: "rv_1",
+      category: "target",
+      url: "https://x.com/example_target_acc",
+      title: "@example_target_acc（粘着アカウント）",
+      reason: "数ヶ月にわたり虚偽の噂をリプライ・引用で拡散し続けており、絶対に開示して損害賠償請求したい。",
+      sub: "過去投稿をさらってアウト投稿を探す",
+      memo: "過去の削除済み投稿も含めて魚拓を確認予定",
+      createdAt: "2026-11-26"
+    },
+    {
+      id: "rv_2",
+      category: "evidence",
+      url: "https://x.com/example_target_acc/status/1900000000000000001",
+      title: "高級腕時計・勤務先匂わせ投稿",
+      reason: "",
+      sub: "資力・年齢の推測に役立ちそう",
+      memo: "正社員・30代前後と推測できる内容。損害賠償の回収見込み資料に使える",
+      createdAt: "2026-11-26"
+    },
+    {
+      id: "rv_3",
+      category: "disclosable",
+      url: "https://x.com/example_target_acc/status/1900000000000000002",
+      title: "「詐欺師・犯罪歴あり」との断定投稿",
+      reason: "",
+      sub: "弁護士に相談予定",
+      memo: "名誉毀損（事実摘示）に該当する可能性が高い。次回打合せで優先相談",
+      createdAt: "2026-11-26"
+    }
+  ];
+
+  function loadReviewItems() {
+    try {
+      const raw = localStorage.getItem(REVIEW_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (_) {}
+    return DEFAULT_REVIEW_ITEMS.slice();
+  }
+
+  function saveReviewItems(items) {
+    try {
+      localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(items));
+    } catch (_) {}
+  }
+
+  function escHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getCategoryMeta(cat) {
+    if (cat === "target") return { label: "🔥 やっつけたい垢", cls: "cat-target" };
+    if (cat === "evidence") return { label: "📎 証拠に使えそう", cls: "cat-evidence" };
+    return { label: "⚖️ 開示できそう", cls: "cat-disclosable" };
+  }
+
+  function getStatusOptions(cat) {
+    if (cat === "target") {
+      return [
+        "過去投稿をさらってアウト投稿を探す",
+        "今後注視してアウト投稿を待つ",
+        "アウト投稿発見・開示検討へ"
+      ];
+    }
+    if (cat === "evidence") {
+      return [
+        "資力・年齢の推測に役立ちそう",
+        "継続的な嫌がらせの証明",
+        "経緯の説明",
+        "その他"
+      ];
+    }
+    return ["弁護士に相談予定", "魚拓保全済み", "見送り"];
+  }
+
+  function renderReviewList() {
+    const listEl = document.getElementById("review-list");
+    const badgeEl = document.getElementById("review-count-badge");
+    if (!listEl) return;
+
+    const allItems = loadReviewItems();
+    if (badgeEl) badgeEl.textContent = String(allItems.length);
+
+    const filtered =
+      currentReviewTab === "all"
+        ? allItems
+        : allItems.filter((it) => it.category === currentReviewTab);
+
+    if (filtered.length === 0) {
+      listEl.innerHTML =
+        '<div class="review-empty">この分類の検討アイテムはまだありません。「＋ 追加」から登録できます。</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered
+      .map((it) => {
+        const meta = getCategoryMeta(it.category);
+        const opts = getStatusOptions(it.category)
+          .map(
+            (opt) =>
+              `<option value="${escHtml(opt)}"${opt === it.sub ? " selected" : ""}>${escHtml(opt)}</option>`
+          )
+          .join("");
+
+        return `
+          <div class="review-item">
+            <div class="review-item-top">
+              <span class="review-pill ${meta.cls}">${meta.label}</span>
+              ${it.sub ? `<span class="review-pill sub">${escHtml(it.sub)}</span>` : ""}
+            </div>
+            ${it.title ? `<div class="review-item-title">${escHtml(it.title)}</div>` : ""}
+            <a class="review-item-url" href="${escHtml(it.url)}" target="_blank" rel="noopener noreferrer">${escHtml(it.url)}</a>
+            ${
+              it.category === "target" && it.reason
+                ? `<div class="review-item-reason"><b>やっつけたい理由：</b>${escHtml(it.reason)}</div>`
+                : ""
+            }
+            ${
+              it.memo
+                ? `<div class="review-item-reason"><b>メモ：</b>${escHtml(it.memo)}</div>`
+                : ""
+            }
+            <div class="review-item-foot">
+              <select class="review-status-select" onchange="updateReviewItemSub('${escHtml(it.id)}', this.value)">
+                ${opts}
+              </select>
+              <button type="button" class="review-del-btn" onclick="deleteReviewItem('${escHtml(it.id)}')">削除</button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  window.switchReviewTab = function (cat) {
+    currentReviewTab = cat;
+    document.querySelectorAll("#review-tabs .review-tab").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-rcat") === cat);
+    });
+    renderReviewList();
+  };
+
+  window.toggleReviewForm = function (forceOpen) {
+    const form = document.getElementById("review-add-form");
+    if (!form) return;
+    const shouldOpen =
+      typeof forceOpen === "boolean" ? forceOpen : !form.classList.contains("open");
+    form.classList.toggle("open", shouldOpen);
+    if (shouldOpen) {
+      window.updateReviewFormFields();
+    }
+  };
+
+  window.updateReviewFormFields = function () {
+    const cat = (document.getElementById("review-inp-cat") || {}).value || "target";
+    const fTarget = document.getElementById("review-fields-target");
+    const fEvidence = document.getElementById("review-fields-evidence");
+    const fDisclosable = document.getElementById("review-fields-disclosable");
+    if (fTarget) fTarget.style.display = cat === "target" ? "flex" : "none";
+    if (fEvidence) fEvidence.style.display = cat === "evidence" ? "flex" : "none";
+    if (fDisclosable) fDisclosable.style.display = cat === "disclosable" ? "flex" : "none";
+  };
+
+  window.submitReviewItem = function (e) {
+    e.preventDefault();
+    const cat = document.getElementById("review-inp-cat").value;
+    const url = document.getElementById("review-inp-url").value.trim();
+    if (!url) return;
+
+    const title = document.getElementById("review-inp-title").value.trim();
+    const memo = document.getElementById("review-inp-memo").value.trim();
+    let reason = "";
+    let sub = "";
+
+    if (cat === "target") {
+      reason = document.getElementById("review-inp-reason").value.trim();
+      sub = document.getElementById("review-inp-strategy").value;
+    } else if (cat === "evidence") {
+      sub = document.getElementById("review-inp-evtype").value;
+    } else {
+      sub = document.getElementById("review-inp-dstatus").value;
+    }
+
+    const items = loadReviewItems();
+    items.unshift({
+      id: "rv_" + Date.now(),
+      category: cat,
+      url,
+      title,
+      reason,
+      sub,
+      memo,
+      createdAt: new Date().toISOString().slice(0, 10)
+    });
+    saveReviewItems(items);
+
+    document.getElementById("review-add-form").reset();
+    window.toggleReviewForm(false);
+    renderReviewList();
+    if (typeof showToast === "function") {
+      showToast("開示検討リストに追加しました");
+    }
+  };
+
+  window.updateReviewItemSub = function (id, newSub) {
+    const items = loadReviewItems();
+    const target = items.find((it) => it.id === id);
+    if (!target) return;
+    target.sub = newSub;
+    saveReviewItems(items);
+    renderReviewList();
+  };
+
+  window.deleteReviewItem = function (id) {
+    const items = loadReviewItems().filter((it) => it.id !== id);
+    saveReviewItems(items);
+    renderReviewList();
+    if (typeof showToast === "function") {
+      showToast("リストから削除しました");
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderReviewList);
+  } else {
+    renderReviewList();
+  }
+})();

@@ -385,6 +385,94 @@
           <div class="sr-cheer-prog"><i id="task-cheer-bar" style="width:0%"></i></div>
           <div id="task-list"></div>
         </div>
+
+        <!-- 開示検討リスト -->
+        <div class="sr-card" id="task-review-card">
+          <div class="sr-hd">
+            <b style="flex:none;">開示検討リスト</b>
+            <span class="sr-badge" id="review-count-badge">0</span>
+            <button type="button" class="review-add-btn" onclick="toggleReviewForm()">＋ 追加</button>
+          </div>
+
+          <div class="review-tabs" id="review-tabs">
+            <button type="button" class="review-tab active" data-rcat="all" onclick="switchReviewTab('all')">すべて</button>
+            <button type="button" class="review-tab" data-rcat="target" onclick="switchReviewTab('target')">🔥 やっつけたい垢</button>
+            <button type="button" class="review-tab" data-rcat="evidence" onclick="switchReviewTab('evidence')">📎 証拠に使えそう</button>
+            <button type="button" class="review-tab" data-rcat="disclosable" onclick="switchReviewTab('disclosable')">⚖️ 開示できそう</button>
+          </div>
+
+          <form id="review-add-form" class="review-form" onsubmit="submitReviewItem(event)">
+            <label>
+              種類
+              <select id="review-inp-cat" onchange="updateReviewFormFields()">
+                <option value="target">🔥 絶対にやっつけたいアカウント</option>
+                <option value="evidence">📎 証拠に使えそうな投稿</option>
+                <option value="disclosable">⚖️ 開示ができそうな投稿</option>
+              </select>
+            </label>
+            <label>
+              URL（必須）
+              <input id="review-inp-url" type="url" placeholder="https://x.com/..." required>
+            </label>
+            <label>
+              アカウント名 / タイトル（任意）
+              <input id="review-inp-title" type="text" placeholder="例：@example_acc / スレ名など">
+            </label>
+
+            <!-- やっつけたいアカウント専用 -->
+            <div id="review-fields-target" style="display:flex; flex-direction:column; gap:10px;">
+              <label>
+                やっつけたい理由（経緯・感情メモ）
+                <textarea id="review-inp-reason" placeholder="例：長期間にわたり事実無根のデマを拡散し続けており、絶対に開示して損害賠償請求したい"></textarea>
+              </label>
+              <label>
+                調査方針
+                <select id="review-inp-strategy">
+                  <option value="過去投稿をさらってアウト投稿を探す">過去投稿をさらってアウト投稿を探す</option>
+                  <option value="今後注視してアウト投稿を待つ">今後注視してアウト投稿を待つ</option>
+                  <option value="アウト投稿発見・開示検討へ">アウト投稿発見・開示検討へ</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- 証拠に使えそうな投稿専用 -->
+            <div id="review-fields-evidence" style="display:none; flex-direction:column; gap:10px;">
+              <label>
+                証拠の分類
+                <select id="review-inp-evtype">
+                  <option value="資力・年齢の推測に役立ちそう">資力・年齢の推測に役立ちそう</option>
+                  <option value="継続的な嫌がらせの証明">継続的な嫌がらせの証明</option>
+                  <option value="経緯の説明">経緯の説明</option>
+                  <option value="その他">その他</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- 開示ができそうな投稿専用 -->
+            <div id="review-fields-disclosable" style="display:none; flex-direction:column; gap:10px;">
+              <label>
+                検討ステータス
+                <select id="review-inp-dstatus">
+                  <option value="弁護士に相談予定">弁護士に相談予定</option>
+                  <option value="魚拓保全済み">魚拓保全済み</option>
+                  <option value="見送り">見送り</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              メモ（任意）
+              <textarea id="review-inp-memo" placeholder="権利侵害のポイントや補足メモなど"></textarea>
+            </label>
+
+            <div class="review-form-actions">
+              <button type="button" class="review-btn-cancel" onclick="toggleReviewForm(false)">キャンセル</button>
+              <button type="submit" class="review-btn-save">リストに追加</button>
+            </div>
+          </form>
+
+          <div class="review-list" id="review-list"></div>
+        </div>
       </div>
     </div>
 
